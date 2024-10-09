@@ -299,7 +299,8 @@ def edit_sigma(All_Data, Sigma, Signum):
             Signum_temp = Signum_temp - 1
     return All_Data
 
-
+def statistics(All_Data, Edit_Data, Delta_data, Reconvergence, Recon_list):
+    i = 1
     
 
 def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [], Ylim = 0.2, Save_dir = "", Show = True, Fixed = False, All = False, Time_type = "", Delta_xlabel = 1, Mean = False, Sigma = 3, Signum = 0, Delta_data = 30, Reconvergence = 3600, Recon_list = []):
@@ -326,13 +327,13 @@ def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [
     num_mode = len(File_info)
     [XLabel,XTick,cov_time,begT,LastT]=xtick_min(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
     # Initialization
-    PLOT_ALL = {}
+    PLOT_ALL,PLOT_RAW = {},{}
     type_list = ["E","N","U","NSAT","PDOP","AMB","TIME"]
     for i in range(num_mode):
         if File_info[i][2] not in PLOT_ALL:
-            PLOT_ALL[File_info[i][2]] = {}
+            PLOT_ALL[File_info[i][2]],PLOT_RAW[File_info[i][2]] = {},{}
             for cur_type in type_list:
-                PLOT_ALL[File_info[i][2]][cur_type] = []
+                PLOT_ALL[File_info[i][2]][cur_type],PLOT_RAW[File_info[i][2]][cur_type] = [],[]
     # Convert
     for i in range(num_mode):
         for cur_time in Data_All[File_info[i][2]]:
@@ -341,19 +342,21 @@ def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [
                 if(Fixed and Data_All[File_info[i][2]][cur_time]["AMB"] == 0):
                     continue
                 PLOT_ALL[File_info[i][2]]["TIME"].append(plot_time)
+                PLOT_RAW[File_info[i][2]]["TIME"].append(plot_time)
                 for cur_type in type_list:
                     if cur_type == "TIME":
                         continue
                     PLOT_ALL[File_info[i][2]][cur_type].append(Data_All[File_info[i][2]][cur_time][cur_type])
+                    PLOT_RAW[File_info[i][2]][cur_type].append(Data_All[File_info[i][2]][cur_time][cur_type])
     Mode_list = [File_info[i][2] for i in range(num_mode)]
     
     #=== Sigma ===#
-    PLOT_EDIT = PLOT_ALL
     if Signum != 0:
-        PLOT_EDIT = edit_sigma(All_Data = PLOT_ALL, Sigma=Sigma, Signum = Signum)
+        edit_sigma(All_Data = PLOT_ALL, Sigma=Sigma, Signum = Signum)
     #=== Plot ===#
     if Plot_type == ["E","N","U"]:
-        plot_E_N_U(Plot_Data=PLOT_EDIT, Plot_type=Plot_type, Mode_list=Mode_list, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show)
-    #=== Static ===#
-    
+        plot_E_N_U(Plot_Data=PLOT_ALL, Plot_type=Plot_type, Mode_list=Mode_list, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show)
+    #=== Statistics ===#
+    statistics(PLOT_RAW,PLOT_ALL,Delta_data,Reconvergence,Recon_list)
+
 
