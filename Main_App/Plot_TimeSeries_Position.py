@@ -16,23 +16,23 @@ import Lib_Plot_Position as PlotPOS
 
 #Setup Plot
 file_info_list = [
-    ["/Users/hanjunjie/Master_3/1-IUGG/ResFromServer/CLIENT/FLT_CROSS/2021272/HKCL-GEC2-FIXED-0-30.flt", "HKCL", "HKCL"],
-    ["/Users/hanjunjie/Master_3/1-IUGG/ResFromServer/CLIENT/FLT_CROSS/2021272/HKLM-GEC2-FIXED-0-30.flt", "HKLM", "HKLM"],
+    ["/Users/hanjunjie/Master_3/1-IUGG/ResFromServer/CLIENT/FLT_CROSS/2021272/HKCL-GEC2-FIXED-0-30-3600.flt", "HKCL", "HKCL"],
+    ["/Users/hanjunjie/Master_3/1-IUGG/ResFromServer/CLIENT/FLT_CROSS/2021272/HKLM-GEC2-FIXED-0-30-3600.flt", "HKLM", "HKLM"],
     ] #[filedir, station_name, mode_name] for static station // #[filedir, ref_file, mode_name] for dynamic station
 
 start_time = [2021,9,29,3,0,0]
 end_time = [2021,9,29,24,0,0]
-plot_type = ["E","N","U"]
-ylim = 0.1
+plot_type = ["E","N","U","NSAT"]
+ylim = 0.15
 save_dir = ""
 show = True
 fixed = True
-all = True
-mean = False
+all = False
+mean = True
 time_type = "GPST"
 delta_xlabel = 3
 sigma = 3
-sigma_num = 0
+sigma_num = 1
 #Setup Statistics
 delta_data = 30
 reconvergence = 3600

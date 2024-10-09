@@ -3,6 +3,7 @@ from multiprocessing.dummy import DummyProcess
 import os
 from socket import SHUT_WR
 import sys
+from turtle import st
 sys.path.insert(0,os.path.dirname(__file__)+'/../LibBase')
 from matplotlib.markers import MarkerStyle
 import numpy as np
@@ -229,6 +230,174 @@ def XYZ2ENU_dynamic(XYZ = {},REF_FILE = ""):
             all_data[time]["AMB"] = XYZ[time]["AMB"]
     return all_data
 
+def edit_sigma(All_Data, Sigma, Signum):
+    type_list = ["E","N","U"]
+    type_list_all = ["E","N","U","NSAT","PDOP","AMB","TIME"]
+    for cur_key in All_Data.keys():
+        Signum_temp = Signum
+        while Signum_temp >= 1:
+            index_rm_all = np.full((len(All_Data[cur_key]["E"])),False)
+            for i in range(len(type_list)):
+                np_list = np.array(All_Data[cur_key][type_list[i]])
+                std = np.std(np_list)
+                mean = np.std(np_list)
+                np_list_mean = np.abs(np_list-mean)
+                index_rm = np_list_mean > std*Sigma
+                index_rm_all = index_rm_all | index_rm
+            for i in range(len(type_list_all)):
+                All_Data[cur_key][type_list_all[i]] = np.delete(All_Data[cur_key][type_list_all[i]],index_rm_all)
+            Signum_temp = Signum_temp - 1
+    return All_Data
+
+def edit_mean(All_Data,Raw_Data):
+    type_list = ["E","N","U"]
+    for cur_mode in All_Data.keys():
+        for cur_type in type_list:
+            mean_temp = np.mean(All_Data[cur_mode][cur_type])
+            All_Data[cur_mode][cur_type] = All_Data[cur_mode][cur_type] - mean_temp
+            # Raw_Data[cur_mode][cur_type] = Raw_Data[cur_mode][cur_type] - mean_temp
+
+def statistics(All_Data, Edit_Data, Delta_data, Start_time, Duration_time, Reconvergence, Recon_list):
+    num_epoch = Duration_time*3600/Delta_data + 1
+    statistics_value_edit,statistics_value_all = {},{}
+    type_list = ["E","N","U","NSAT"]
+
+    #=== RMS MEAN STD Fixed
+    for cur_mode in Edit_Data:
+        statistics_value_edit[cur_mode] = {}
+        statistics_value_edit[cur_mode]["Integrality"] = len(Edit_Data[cur_mode]["E"]) / num_epoch
+        fixed = np.array(Edit_Data[cur_mode]["AMB"])[np.array(Edit_Data[cur_mode]["AMB"]) == 1].size
+        statistics_value_edit[cur_mode]["Fixed/Fixed+Float"] = fixed / len(Edit_Data[cur_mode]["E"])
+        statistics_value_edit[cur_mode]["RMS"],statistics_value_edit[cur_mode]["MEAN"],statistics_value_edit[cur_mode]["STD"] = {},{},{}
+        for cur_type in type_list:
+            statistics_value_edit[cur_mode]["STD"][cur_type] = np.std(Edit_Data[cur_mode][cur_type])
+            statistics_value_edit[cur_mode]["MEAN"][cur_type] = np.mean(Edit_Data[cur_mode][cur_type])
+            statistics_value_edit[cur_mode]["RMS"][cur_type] = np.sqrt(np.mean(np.array(Edit_Data[cur_mode][cur_type])**2))
+    for cur_mode in All_Data:
+        statistics_value_all[cur_mode] = {}
+        statistics_value_all[cur_mode]["Integrality"] = len(All_Data[cur_mode]["E"]) / num_epoch
+        fixed = np.array(All_Data[cur_mode]["AMB"])[np.array(All_Data[cur_mode]["AMB"]) == 1].size
+        statistics_value_all[cur_mode]["Fixed/Fixed+Float"] = fixed / len(All_Data[cur_mode]["E"])
+        statistics_value_all[cur_mode]["RMS"],statistics_value_all[cur_mode]["MEAN"],statistics_value_all[cur_mode]["STD"] = {},{},{}
+        for cur_type in type_list:
+            statistics_value_all[cur_mode]["STD"][cur_type] = np.std(All_Data[cur_mode][cur_type])
+            statistics_value_all[cur_mode]["MEAN"][cur_type] = np.mean(All_Data[cur_mode][cur_type])
+            statistics_value_all[cur_mode]["RMS"][cur_type] = np.sqrt(np.mean(np.array(All_Data[cur_mode][cur_type])**2))
+    #=== Reconvergence ===#
+    # Set
+    max_recon_time = 1800
+    cont_continue = 10
+    # Initialization
+    con_horizontal,con_vertical,con_position = {},{},{}
+    for cur_mode in Edit_Data.keys():
+        if cur_mode not in con_horizontal.keys():
+            con_horizontal[cur_mode],con_vertical[cur_mode],con_position[cur_mode] = {},{},{}
+            for cur_accuracy in Recon_list:
+                con_horizontal[cur_mode][cur_accuracy] = []
+                con_vertical[cur_mode][cur_accuracy] = []
+                con_position[cur_mode][cur_accuracy] = []
+    # Start reconvergence
+    if Reconvergence != 0:
+        for cur_mode in Edit_Data.keys():
+            time_np = np.array(Edit_Data[cur_mode]["TIME"])
+            e_np,n_np,u_np = np.array(Edit_Data[cur_mode]["E"]),np.array(Edit_Data[cur_mode]["N"]),np.array(Edit_Data[cur_mode]["U"])
+            horizontal = np.sqrt(e_np**2+n_np**2)*100
+            vertical = np.abs(u_np)*100
+            position = np.sqrt(e_np**2+n_np**2+u_np**2)*100
+            cur_time = Start_time[3] * 3600
+            # i = 0
+            for i in range(int(Duration_time*3600 / Reconvergence)):
+                for cur_accuracy in Recon_list:
+                    cur_time = Start_time[3] * 3600 + i * Reconvergence
+                    con_position_num,con_horizontal_num,con_vertical_num = 0,0,0
+                    while cur_time < Start_time[3] * 3600 + (i+1) * Reconvergence:
+                        find_time = time_np[time_np == cur_time/3600]
+                        find_time_index = time_np == cur_time/3600
+                        if find_time.size < 1:
+                            cur_time = cur_time + Delta_data
+                            continue
+                        # 3D position
+                        if position[find_time_index] < cur_accuracy:
+                            if con_position_num < cont_continue:
+                                con_position_num = con_position_num + 1
+                        elif con_position_num < cont_continue:
+                            con_position_num = 0
+                        if con_position_num == cont_continue:
+                            con_position[cur_mode][cur_accuracy].append(cur_time - (Start_time[3] * 3600 + i * Reconvergence) - Delta_data * (cont_continue-1))
+                            con_position_num = 9999999
+                        # vertival
+                        if vertical[find_time_index] < cur_accuracy:
+                            if con_vertical_num < cont_continue:
+                                con_vertical_num = con_vertical_num + 1
+                        elif con_vertical_num < cont_continue:
+                            con_vertical_num = 0
+                        if con_vertical_num == cont_continue:
+                            con_vertical[cur_mode][cur_accuracy].append(cur_time - (Start_time[3] * 3600 + i * Reconvergence) - Delta_data * (cont_continue-1))
+                            con_vertical_num = 9999999
+                        # horizontal
+                        if horizontal[find_time_index] < cur_accuracy:
+                            if con_horizontal_num < cont_continue:
+                                con_horizontal_num = con_horizontal_num + 1
+                        elif con_horizontal_num < cont_continue:
+                            con_horizontal_num = 0
+                        if con_horizontal_num == cont_continue:
+                            con_horizontal[cur_mode][cur_accuracy].append(cur_time - (Start_time[3] * 3600 + i * Reconvergence) - Delta_data * (cont_continue-1))
+                            con_horizontal_num = 9999999
+                        
+                        if cur_time - (Start_time[3] * 3600 + i * Reconvergence) > max_recon_time:
+                            if con_horizontal_num != 9999999:
+                                con_horizontal[cur_mode][cur_accuracy].append(max_recon_time)
+                            if con_position_num != 9999999:
+                                con_position[cur_mode][cur_accuracy].append(max_recon_time)
+                            if con_vertical_num != 9999999:
+                                con_vertical[cur_mode][cur_accuracy].append(max_recon_time)
+                            break
+                        cur_time = cur_time + Delta_data
+    
+    #===Print Statistical Value===#
+    # Static Value Raw
+    Static_print = statistics_value_edit
+    type_enu = ["E","N","U"]
+    # print("{:>23}".format("E-N-U"))
+    for cur_type in type_enu:
+        print(cur_type)
+        print("{:<15}".format("Mode") + "{:>7}".format("RMS(cm)") + \
+                                         "{:>14}".format("MEAN(cm)") + \
+                                         "{:>14}".format("STD(cm)"))
+        for cur_mode in Static_print.keys():
+            Str_temp = "{:<15}".format(cur_mode) + "{:>7.2f}".format(Static_print[cur_mode]["RMS"][cur_type]*100) + \
+                                                "{:>14.2f}".format(Static_print[cur_mode]["MEAN"][cur_type]*100) + \
+                                                "{:>14.2f}".format(Static_print[cur_mode]["STD"][cur_type]*100)
+            print(Str_temp)
+        # print("\n")
+    print("{}".format("RATE"))
+    type_others = ["Integrality","Fixed/Fixed+Float","NSAT"]
+    print("{:<15}".format("Mode") + "{:>7}".format("Inter") + \
+                                         "{:>14}".format("Fixed") + \
+                                         "{:>14}".format("NSAT"))
+    for cur_mode in Static_print.keys():
+        Str_temp = "{:<15}".format(cur_mode) + "{:>6.2f}%".format(Static_print[cur_mode]["Integrality"]*100) + \
+                                            "{:>13.2f}%".format(Static_print[cur_mode]["Fixed/Fixed+Float"]*100) + \
+                                            "{:>14.2f}".format(Static_print[cur_mode]["MEAN"]["NSAT"])
+        print(Str_temp)
+    # Print Revonvergence
+    for cur_accuracy in Recon_list:
+        print("{:>2}cm-RECONVERGENCE".format(cur_accuracy))
+        print("{:<15}".format("Mode") + "{:>7}".format("Hor(s)") + \
+                                         "{:>14}".format("Ver(s)") + \
+                                         "{:>14}".format("3D(s)"))
+        for cur_mode in con_position.keys():
+            Str_temp = "{:<15}".format(cur_mode) + "{:>7}".format(int(np.mean(con_horizontal[cur_mode][cur_accuracy]))) + \
+                                                "{:>14}".format(int(np.mean(con_vertical[cur_mode][cur_accuracy]))) + \
+                                                "{:>14}".format(int(np.mean(con_position[cur_mode][cur_accuracy])))
+            print(Str_temp)
+        # for cur_mode in Static_print.keys():
+
+    
+
+
+
+
 def plot_E_N_U(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, XlabelSet = [], Show = True):
     #===Plot===#
     row = len(Plot_type)
@@ -236,10 +405,7 @@ def plot_E_N_U(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, Xlabe
     figP,axP = plt.subplots(row,1,figsize=(9,9),sharey=True,sharex=True)
     for i in range(row):
         for j in range(num_mode):
-            if Plot_type[i] == "NSAT":
-                axP[i].plot(Plot_Data[Mode_list[j]]["TIME"],Plot_Data[Mode_list[j]]["NSAT"])
-            else:
-                axP[i].scatter(Plot_Data[Mode_list[j]]["TIME"],Plot_Data[Mode_list[j]][Plot_type[i]],s=35,color = color_list[j%num_mode])
+            axP[i].scatter(Plot_Data[Mode_list[j]]["TIME"],Plot_Data[Mode_list[j]][Plot_type[i]],s=35,color = color_list[j%num_mode])
     axP[row - 1].set_xlabel("GPS time (hour)",font_label)
 
     #===Set Label===#
@@ -250,7 +416,7 @@ def plot_E_N_U(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, Xlabe
     for i in range(row):
         labels = labels + axP[i].get_yticklabels() + axP[i].get_xticklabels()
     [label.set_fontsize(xtick_size) for label in labels]
-    [label.set_fontname('Times New Roman') for label in labels]
+    [label.set_fontname('Arial') for label in labels]
     for i in range(row):
         if Plot_type[i] == "E":
             axP[i].set_ylabel("East errors (m)",font_label)
@@ -278,30 +444,73 @@ def plot_E_N_U(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, Xlabe
             borderaxespad=0,bbox_to_anchor=(1,1.2),loc=1) 
     if Show:
         plt.show()
-    plt.close()
+    plt.close()  
 
-def edit_sigma(All_Data, Sigma, Signum):
-    type_list = ["E","N","U"]
-    type_list_all = ["E","N","U","NSAT","PDOP","AMB","TIME"]
-    for cur_key in All_Data.keys():
-        Signum_temp = Signum
-        while Signum_temp >= 1:
-            index_rm_all = np.full((len(All_Data[cur_key]["E"])),False)
-            for i in range(len(type_list)):
-                np_list = np.array(All_Data[cur_key][type_list[i]])
-                std = np.std(np_list)
-                mean = np.std(np_list)
-                np_list_mean = np.abs(np_list-mean)
-                index_rm = np_list_mean > std*Sigma
-                index_rm_all = index_rm_all | index_rm
-            for i in range(len(type_list_all)):
-                All_Data[cur_key][type_list_all[i]] = np.delete(All_Data[cur_key][type_list_all[i]],index_rm_all)
-            Signum_temp = Signum_temp - 1
-    return All_Data
+def plot_E_N_U_NSAT(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, XlabelSet = [], Show = True):
+    #===Plot===#
+    row = len(Plot_type)
+    num_mode = len(Mode_list)
+    figP,axP = plt.subplots(row,1,figsize=(9,10),sharey=False,sharex=True)
+    for i in range(row):
+        for j in range(num_mode):
+            if Plot_type[i] == "NSAT":
+                axP[i].plot(Plot_Data[Mode_list[j]]["TIME"],Plot_Data[Mode_list[j]]["NSAT"],color = color_list[j%num_mode])
+            else:
+                axP[i].scatter(Plot_Data[Mode_list[j]]["TIME"],Plot_Data[Mode_list[j]][Plot_type[i]],s=35,color = color_list[j%num_mode])
+                axP[i].set_ylim(-Ylim,Ylim)
+    axP[row - 1].set_xlabel("GPS time (hour)",font_label)
 
-def statistics(All_Data, Edit_Data, Delta_data, Reconvergence, Recon_list):
-    i = 1
+    #===Set Label===#
     
+    axP[row - 1].set_xticklabels(XlabelSet[0])
+    axP[row - 1].set_xticks(XlabelSet[1])
+    labels = axP[0].get_yticklabels()
+    for i in range(row):
+        labels = labels + axP[i].get_yticklabels() + axP[i].get_xticklabels()
+    [label.set_fontsize(xtick_size) for label in labels]
+    [label.set_fontname('Arial') for label in labels]
+    for i in range(row):
+        if Plot_type[i] == "E":
+            axP[i].set_ylabel("East errors (m)",font_label)
+        if Plot_type[i] == "N":
+            axP[i].set_ylabel("North errors (m)",font_label)
+        if Plot_type[i] == "U":
+            axP[i].set_ylabel("Up errors (m)",font_label)
+        if Plot_type[i] == "NSAT":
+            axP[i].set_ylabel("Number of SAT",font_label)
+
+    #===Set text (RMS)===#
+    type_list = ["E","N","U","NSAT","PDOP","AMB","TIME"]
+    for i in range(row):
+        if type_list[i] == "NSAT":
+            text_temp = {}
+            RMS_value = []
+            for j in range(num_mode):
+                RMS_value.append(np.mean(Plot_Data[Mode_list[j]][type_list[i]]))
+            MRS_str = "MEAN="
+            for j in range(len(RMS_value)):
+                MRS_str = MRS_str + "{:.2f}, ".format(RMS_value[j])
+            ax_range = axP[i].axis()
+            axP[i].text(ax_range[0],ax_range[3]+Ylim/15,MRS_str[:-2],font_text)
+        else:
+            text_temp = {}
+            RMS_value = []
+            for j in range(num_mode):
+                RMS_value.append(np.sqrt(np.mean(np.array(Plot_Data[Mode_list[j]][type_list[i]])**2))*100)
+            MRS_str = "RMS="
+            for j in range(len(RMS_value)):
+                MRS_str = MRS_str + "{:.2f}cm, ".format(RMS_value[j])
+            ax_range = axP[i].axis()
+            axP[i].text(ax_range[0],ax_range[3]+Ylim/15,MRS_str[:-2],font_text)
+
+    #===Set legend===#
+    axP[0].legend(Mode_list,prop=font_legend,
+            framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=3, 
+            borderaxespad=0,bbox_to_anchor=(1,1.24),loc=1) 
+    if Show:
+        plt.show()
+    plt.close()            
+
 
 def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [], Ylim = 0.2, Save_dir = "", Show = True, Fixed = False, All = False, Time_type = "", Delta_xlabel = 1, Mean = False, Sigma = 3, Signum = 0, Delta_data = 30, Reconvergence = 3600, Recon_list = []):
     file_num = len(File_info)
@@ -353,10 +562,16 @@ def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [
     #=== Sigma ===#
     if Signum != 0:
         edit_sigma(All_Data = PLOT_ALL, Sigma=Sigma, Signum = Signum)
+    if Mean:
+        edit_mean(PLOT_ALL, PLOT_RAW)
+
+    #=== Statistics ===#
+    statistics(PLOT_RAW,PLOT_ALL,Delta_data,Start,duration_time,Reconvergence,Recon_list)
+
     #=== Plot ===#
     if Plot_type == ["E","N","U"]:
         plot_E_N_U(Plot_Data=PLOT_ALL, Plot_type=Plot_type, Mode_list=Mode_list, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show)
-    #=== Statistics ===#
-    statistics(PLOT_RAW,PLOT_ALL,Delta_data,Reconvergence,Recon_list)
+    if Plot_type == ["E","N","U","NSAT"]:
+        plot_E_N_U_NSAT(Plot_Data=PLOT_ALL, Plot_type=Plot_type, Mode_list=Mode_list, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show)
 
 
