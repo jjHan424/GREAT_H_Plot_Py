@@ -109,8 +109,8 @@ def loaddata(File_name = "", Start = [], End = []):
     first_line = next(file)
     file.close()
     first_value = first_line.split()
-    if first_line == "#EOP":
-        i=1
+    if first_value[0] == r"%EPO":
+        AllData = loaddata_lsq(File_name,Start,End)
     else:
         AllData = loaddata_flt(File_name,Start,End)
     return AllData
@@ -144,6 +144,46 @@ def loaddata_flt(File_name = "", Start = [], End = []):
                 else:
                     all_data[soweek]['AMB'] = 0
                 if all_data[soweek]['PDOP'] > 5:
+                    all_data[soweek]['AMB'] = 0
+                
+    return all_data
+
+def loaddata_lsq(File_name = "", Start = [], End = []):
+    all_data={}
+    w_last = 0
+    head_end = False
+    with open(File_name,'rt') as f:
+        for line in f:
+            value = line.split()
+            if line[0] == '%':
+                head_end = True
+                continue
+            if head_end:
+                ymd = value[1]
+                hms = value[2]
+                year = float(ymd[0:4])
+                month = float(ymd[5:7])
+                day = float(ymd[8:10])
+                hour = float(hms[0:2])
+                minute = float(hms[3:5])
+                second = float(hms[6:12])
+                [w,soweek] = tr.ymd2gpst(year,month,day,hour,minute,second)
+                if (w_last==0):
+                    w_last = w
+                soweek = soweek + (w-w_last)*604800
+                #soweek = hour + minute/60.0 + second/3600.0
+                if soweek not in all_data.keys():
+                    all_data[soweek]={}
+                all_data[soweek]['X'] = float(value[5])
+                all_data[soweek]['Y'] = float(value[6])
+                all_data[soweek]['Z'] = float(value[7])
+                all_data[soweek]['CLK'] = float(value[11])
+                all_data[soweek]['NSAT'] = float(value[13])
+                all_data[soweek]['GDOP'] = float(value[15])
+                all_data[soweek]['PDOP'] = float(value[16])
+                if value[17] == 'Fixed':
+                    all_data[soweek]['AMB'] = 1
+                else:
                     all_data[soweek]['AMB'] = 0
                 
     return all_data
@@ -510,7 +550,6 @@ def plot_E_N_U_NSAT(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, 
     if Show:
         plt.show()
     plt.close()            
-
 
 def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [], Ylim = 0.2, Save_dir = "", Show = True, Fixed = False, All = False, Time_type = "", Delta_xlabel = 1, Mean = False, Sigma = 3, Signum = 0, Delta_data = 30, Reconvergence = 3600, Recon_list = []):
     file_num = len(File_info)
