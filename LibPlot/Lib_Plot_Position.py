@@ -103,6 +103,47 @@ def xtick_min(time,year,mon,day,starttime,LastT,deltaT):
     
     return (XLabel,XTick,cov_Time,begT,LastT)
 
+def xtick(time,year,mon,day,starttime,LastT,deltaT):
+    if "+" in time:
+        end_time = len(time)
+        delta_Time = int(time[4:end_time]) + starttime
+        begT = int(time[4:end_time]) + starttime
+    else:
+        delta_Time = starttime
+        begT=starttime
+    #for time in data[mode[0]].keys():
+    secow_start = tr.ymd2gpst(year,mon,day,0,00,00)
+    doy = tr.ymd2doy(year,mon,day,0,00,00)
+    cov_Time = secow_start[1] - 0 * 3600
+    if "+" in time:
+        cov_Time = secow_start[1] - int(time[3:end_time]) * 3600
+    end_Time = begT + LastT
+    delta_X = math.ceil((LastT)/deltaT)
+    XLabel = []
+    XTick = []
+    starttime = begT - deltaT
+
+    # for i in range(delta_X):
+    #     starttime = starttime + deltaT
+    #     cur_Str_X = '%02d' % (starttime % 24) + ":{:0>2}".format(int((starttime-int(starttime))*60))
+    #     XLabel.append(cur_Str_X)
+    #     XTick.append((starttime))       
+    
+    while starttime < end_Time:
+        starttime = starttime + deltaT
+        if (starttime >= end_Time):
+            # cur_Str_X = '%02d' % (end_Time % 24) + ":{:0>2}".format(round((end_Time-int(end_Time))*60))
+            cur_Str_X = '%d' % (end_Time % 24)
+            XLabel.append(cur_Str_X)
+            XTick.append((end_Time))
+            break
+        # cur_Str_X = '%02d' % (starttime % 24) + ":{:0>2}".format(round((starttime-int(starttime))*60))
+        cur_Str_X = '%d' % (starttime % 24)
+        XLabel.append(cur_Str_X)
+        XTick.append((starttime))
+    
+    return (XLabel,XTick,cov_Time,begT,LastT)
+
 def loaddata(File_name = "", Start = [], End = []):
     #Judge the Head
     file = open(File_name,"r")
@@ -326,7 +367,7 @@ def statistics(All_Data, Edit_Data, Delta_data, Start_time, Duration_time, Recon
     #=== Reconvergence ===#
     # Set
     max_recon_time = 1800
-    cont_continue = 10
+    cont_continue = 20
     # Initialization
     con_horizontal,con_vertical,con_position = {},{},{}
     for cur_mode in Edit_Data.keys():
@@ -573,7 +614,7 @@ def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [
     
     #=== Data Convert ===#
     num_mode = len(File_info)
-    [XLabel,XTick,cov_time,begT,LastT]=xtick_min(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
+    [XLabel,XTick,cov_time,begT,LastT]=xtick(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
     # Initialization
     PLOT_ALL,PLOT_RAW = {},{}
     type_list = ["E","N","U","NSAT","PDOP","AMB","TIME"]

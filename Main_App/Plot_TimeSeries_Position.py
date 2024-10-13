@@ -16,21 +16,22 @@ import Lib_Plot_Position as PlotPOS
 
 #Setup Plot
 file_info_list = [
-    ["/Users/hanjunjie/Master_3/1-IUGG/ResFromServer/HKNP-GEC2-FIXED-30.flt", "HKNP", "HKNP"],
-    ["/Users/hanjunjie/Master_3/1-IUGG/ResFromServer/HKOH-GEC2-FIXED-30.flt", "HKOH", "HKOH"],
+    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Project/2021315/client/BRUX-GEC3-FIXED-30-VIR-0.flt", "BRUX", "COR"],
+    # ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Project/2021315/client/BRUX-GEC3-FIXED-30-COR_ION.flt", "BRUX", "COR_ZWD"],
+    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Project/2021315/client/BRUX-GEC3-FIXED-30-VIR.flt", "BRUX", "VIR"],
     ] #[filedir, station_name, mode_name] for static station // #[filedir, ref_file, mode_name] for dynamic station
 
-start_time = [2021,12,10,17,0,0]
-end_time = [2021,12,10,24,0,0]
+start_time = [2021,11,11,2,0,0]
+end_time = [2021,11,11,24,0,0]
 plot_type = ["E","N","U"]
-ylim = 0.15
+ylim = 0.1
 save_dir = ""
 show = True
-fixed = True
+fixed = False
 all = False
-mean = True
+mean = False
 time_type = "GPST"
-delta_xlabel = 3
+delta_xlabel = 1
 sigma = 3
 sigma_num = 0
 #Setup Statistics
