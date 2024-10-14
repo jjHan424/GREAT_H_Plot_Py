@@ -16,9 +16,9 @@ import Lib_Plot_Position as PlotPOS
 
 #Setup Plot
 file_info_list = [
-    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Project/2021315/client/BRUX-GEC3-FIXED-30-VIR-0.flt", "BRUX", "COR"],
-    # ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Project/2021315/client/BRUX-GEC3-FIXED-30-COR_ION.flt", "BRUX", "COR_ZWD"],
-    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Project/2021315/client/BRUX-GEC3-FIXED-30-VIR.flt", "BRUX", "VIR"],
+    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/2021315/BRUX-GEC3-FIXED-40-30-3600.flt", "BRUX", "9"],
+    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/2021315/BRUX-GEC3-FIXED-10-30-3600.flt", "BRUX", "2"],
+    # ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/2021315/BRUX-GEC3-FIXED-0-30-3600.flt", "BRUX", "0"],
     ] #[filedir, station_name, mode_name] for static station // #[filedir, ref_file, mode_name] for dynamic station
 
 start_time = [2021,11,11,2,0,0]

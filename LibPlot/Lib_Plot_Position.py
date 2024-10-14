@@ -61,89 +61,6 @@ color_list = ["#0099E5","#34BF49","#FF4C4C"]
 #               "#b7295a","#6e2585","#f2af00","#5482ab","#ce1126",
 #               "#444444","#eeeeee"]
 
-def xtick_min(time,year,mon,day,starttime,LastT,deltaT):
-    if "+" in time:
-        end_time = len(time)
-        delta_Time = int(time[4:end_time]) + starttime
-        begT = int(time[4:end_time]) + starttime
-    else:
-        delta_Time = starttime
-        begT=starttime
-    #for time in data[mode[0]].keys():
-    secow_start = tr.ymd2gpst(year,mon,day,0,00,00)
-    doy = tr.ymd2doy(year,mon,day,0,00,00)
-    cov_Time = secow_start[1] - 0 * 3600
-    if "+" in time:
-        value = time.split("+")
-        cov_Time = secow_start[1] - int(value[1]) * 3600
-    end_Time = begT + LastT
-    delta_X = math.ceil((LastT)/deltaT)
-    XLabel = []
-    XTick = []
-    starttime = begT - deltaT
-
-    # for i in range(delta_X):
-    #     starttime = starttime + deltaT
-    #     cur_Str_X = '%02d' % (starttime % 24) + ":{:0>2}".format(int((starttime-int(starttime))*60))
-    #     XLabel.append(cur_Str_X)
-    #     XTick.append((starttime))       
-    
-    while starttime < end_Time:
-        starttime = starttime + deltaT
-        if (starttime >= end_Time):
-            cur_Str_X = '%02d' % (end_Time % 24) + ":{:0>2}".format(round((end_Time-int(end_Time))*60))
-            # cur_Str_X = '%d' % (end_Time % 24)
-            XLabel.append(cur_Str_X)
-            XTick.append((end_Time))
-            break
-        cur_Str_X = '%02d' % (starttime % 24) + ":{:0>2}".format(round((starttime-int(starttime))*60))
-        # cur_Str_X = '%d' % (starttime % 24)
-        XLabel.append(cur_Str_X)
-        XTick.append((starttime))
-    
-    return (XLabel,XTick,cov_Time,begT,LastT)
-
-def xtick(time,year,mon,day,starttime,LastT,deltaT):
-    if "+" in time:
-        end_time = len(time)
-        delta_Time = int(time[4:end_time]) + starttime
-        begT = int(time[4:end_time]) + starttime
-    else:
-        delta_Time = starttime
-        begT=starttime
-    #for time in data[mode[0]].keys():
-    secow_start = tr.ymd2gpst(year,mon,day,0,00,00)
-    doy = tr.ymd2doy(year,mon,day,0,00,00)
-    cov_Time = secow_start[1] - 0 * 3600
-    if "+" in time:
-        cov_Time = secow_start[1] - int(time[3:end_time]) * 3600
-    end_Time = begT + LastT
-    delta_X = math.ceil((LastT)/deltaT)
-    XLabel = []
-    XTick = []
-    starttime = begT - deltaT
-
-    # for i in range(delta_X):
-    #     starttime = starttime + deltaT
-    #     cur_Str_X = '%02d' % (starttime % 24) + ":{:0>2}".format(int((starttime-int(starttime))*60))
-    #     XLabel.append(cur_Str_X)
-    #     XTick.append((starttime))       
-    
-    while starttime < end_Time:
-        starttime = starttime + deltaT
-        if (starttime >= end_Time):
-            # cur_Str_X = '%02d' % (end_Time % 24) + ":{:0>2}".format(round((end_Time-int(end_Time))*60))
-            cur_Str_X = '%d' % (end_Time % 24)
-            XLabel.append(cur_Str_X)
-            XTick.append((end_Time))
-            break
-        # cur_Str_X = '%02d' % (starttime % 24) + ":{:0>2}".format(round((starttime-int(starttime))*60))
-        cur_Str_X = '%d' % (starttime % 24)
-        XLabel.append(cur_Str_X)
-        XTick.append((starttime))
-    
-    return (XLabel,XTick,cov_Time,begT,LastT)
-
 def loaddata(File_name = "", Start = [], End = []):
     #Judge the Head
     file = open(File_name,"r")
@@ -487,7 +404,7 @@ def plot_E_N_U(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, Xlabe
     for i in range(row):
         for j in range(num_mode):
             axP[i].scatter(Plot_Data[Mode_list[j]]["TIME"],Plot_Data[Mode_list[j]][Plot_type[i]],s=35,color = color_list[j%num_mode])
-    axP[row - 1].set_xlabel("GPS time (hour)",font_label)
+    
 
     #===Set Label===#
     axP[0].set_ylim(-Ylim,Ylim)
@@ -505,7 +422,8 @@ def plot_E_N_U(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, Xlabe
             axP[i].set_ylabel("North errors (m)",font_label)
         if Plot_type[i] == "U":
             axP[i].set_ylabel("Up errors (m)",font_label)
-
+    axP[row - 1].set_xlabel("GPS time (hour)",font_label)
+    
     #===Set text (RMS)===#
     type_list = ["E","N","U","NSAT","PDOP","AMB","TIME"]
     for i in range(row):
@@ -614,7 +532,7 @@ def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [
     
     #=== Data Convert ===#
     num_mode = len(File_info)
-    [XLabel,XTick,cov_time,begT,LastT]=xtick(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
+    [XLabel,XTick,cov_time,begT,LastT]=glv.xtick(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
     # Initialization
     PLOT_ALL,PLOT_RAW = {},{}
     type_list = ["E","N","U","NSAT","PDOP","AMB","TIME"]

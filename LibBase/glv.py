@@ -3,6 +3,8 @@
 # date: 20190520
 #coding:utf8
 from numpy import *
+import math
+import trans as tr
 
 div_ref = {'GNSS_INS20190613':[-2267821.37349,5009333.67843,3220980.19527],
 'GNSS_INS20190614':[-2280124.80746,5007874.71896,3214600.77599],
@@ -59,3 +61,85 @@ mpsh = 1/sqrt( hur); # m / sqrt(hour)
 mpspsh = 1/1/sqrt( hur); # (m/s) / sqrt(hour), 1*mpspsh~=1700*ugpsHz
 ppmpsh =  ppm/sqrt( hur); # ppm / sqrt(hour)
 
+def xtick_min(time,year,mon,day,starttime,LastT,deltaT):
+    if "+" in time:
+        end_time = len(time)
+        delta_Time = int(time[4:end_time]) + starttime
+        begT = int(time[4:end_time]) + starttime
+    else:
+        delta_Time = starttime
+        begT=starttime
+    #for time in data[mode[0]].keys():
+    secow_start = tr.ymd2gpst(year,mon,day,0,00,00)
+    doy = tr.ymd2doy(year,mon,day,0,00,00)
+    cov_Time = secow_start[1] - 0 * 3600
+    if "+" in time:
+        value = time.split("+")
+        cov_Time = secow_start[1] - int(value[1]) * 3600
+    end_Time = begT + LastT
+    delta_X = math.ceil((LastT)/deltaT)
+    XLabel = []
+    XTick = []
+    starttime = begT - deltaT
+
+    # for i in range(delta_X):
+    #     starttime = starttime + deltaT
+    #     cur_Str_X = '%02d' % (starttime % 24) + ":{:0>2}".format(int((starttime-int(starttime))*60))
+    #     XLabel.append(cur_Str_X)
+    #     XTick.append((starttime))       
+    
+    while starttime < end_Time:
+        starttime = starttime + deltaT
+        if (starttime >= end_Time):
+            cur_Str_X = '%02d' % (end_Time % 24) + ":{:0>2}".format(round((end_Time-int(end_Time))*60))
+            # cur_Str_X = '%d' % (end_Time % 24)
+            XLabel.append(cur_Str_X)
+            XTick.append((end_Time))
+            break
+        cur_Str_X = '%02d' % (starttime % 24) + ":{:0>2}".format(round((starttime-int(starttime))*60))
+        # cur_Str_X = '%d' % (starttime % 24)
+        XLabel.append(cur_Str_X)
+        XTick.append((starttime))
+    
+    return (XLabel,XTick,cov_Time,begT,LastT)
+
+def xtick(time,year,mon,day,starttime,LastT,deltaT):
+    if "+" in time:
+        end_time = len(time)
+        delta_Time = int(time[4:end_time]) + starttime
+        begT = int(time[4:end_time]) + starttime
+    else:
+        delta_Time = starttime
+        begT=starttime
+    #for time in data[mode[0]].keys():
+    secow_start = tr.ymd2gpst(year,mon,day,0,00,00)
+    doy = tr.ymd2doy(year,mon,day,0,00,00)
+    cov_Time = secow_start[1] - 0 * 3600
+    if "+" in time:
+        cov_Time = secow_start[1] - int(time[3:end_time]) * 3600
+    end_Time = begT + LastT
+    delta_X = math.ceil((LastT)/deltaT)
+    XLabel = []
+    XTick = []
+    starttime = begT - deltaT
+
+    # for i in range(delta_X):
+    #     starttime = starttime + deltaT
+    #     cur_Str_X = '%02d' % (starttime % 24) + ":{:0>2}".format(int((starttime-int(starttime))*60))
+    #     XLabel.append(cur_Str_X)
+    #     XTick.append((starttime))       
+    
+    while starttime < end_Time:
+        starttime = starttime + deltaT
+        if (starttime >= end_Time):
+            # cur_Str_X = '%02d' % (end_Time % 24) + ":{:0>2}".format(round((end_Time-int(end_Time))*60))
+            cur_Str_X = '%d' % (end_Time % 24)
+            XLabel.append(cur_Str_X)
+            XTick.append((end_Time))
+            break
+        # cur_Str_X = '%02d' % (starttime % 24) + ":{:0>2}".format(round((starttime-int(starttime))*60))
+        cur_Str_X = '%d' % (starttime % 24)
+        XLabel.append(cur_Str_X)
+        XTick.append((starttime))
+    
+    return (XLabel,XTick,cov_Time,begT,LastT)

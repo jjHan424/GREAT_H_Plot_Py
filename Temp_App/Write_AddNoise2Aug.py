@@ -7,14 +7,14 @@ import numpy as np
 
 site_list = ["BRUX","FFMJ","WARE"]
 file_dir = "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Data/2021/AUG"
-file_dir_write = "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Data/2021/AUG_NOISE"
+file_dir_write = "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Data/2021/AUG_ZWD_NOISE"
 step = 0.005 # m
-total_num = 40
+total_num = 200
 for cur_site in site_list:
     raw_file = os.path.join(file_dir,"{}-GEC3-FIXED-30.aug".format(cur_site))
     with open(raw_file,'rt') as f:
         for line in f:
-            for cur_accuracy in range(1,total_num+1):
+            for cur_accuracy in range(1,total_num + 1):
                 write_file = os.path.join(file_dir_write,"{}-GEC3-FIXED-30-{:0>2}.aug".format(cur_site,cur_accuracy))
                 with open(write_file,'a') as file:
                     file.write(line)
@@ -23,14 +23,14 @@ for cur_site in site_list:
                 break
         for line in f:
             if line[0] == ">":
-                for cur_accuracy in range(1,total_num+1):
+                for cur_accuracy in range(1,total_num + 1):
                     write_file = os.path.join(file_dir_write,"{}-GEC3-FIXED-30-{:0>2}.aug".format(cur_site,cur_accuracy))
                     with open(write_file,'a') as file:
                         file.write(line)
                     file.close()
             else:
                 value = line.split()
-                for cur_accuracy in range(1,total_num+1):
+                for cur_accuracy in range(1,total_num + 1):
                     index_noise = 0
                     index_iono = -1
                     write_file = os.path.join(file_dir_write,"{}-GEC3-FIXED-30-{:0>2}.aug".format(cur_site,cur_accuracy))
@@ -41,7 +41,7 @@ for cur_site in site_list:
                         if cur_value[0] == "C" or cur_value[0] == "E" or cur_value[0] == "G":
                             continue
                         else:
-                            if index_iono == 6:
+                            if index_iono == 5:
                                 write_str = write_str + "{:>12.4f}".format(float(cur_value) + white_noise[index_noise])
                                 # index_noise = index_noise + 1
                             else:
