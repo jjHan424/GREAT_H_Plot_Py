@@ -489,8 +489,6 @@ def plot_E_N_U_NSAT(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, 
             MRS_str = "MEAN="
             for j in range(len(RMS_value)):
                 MRS_str = MRS_str + "{:.2f}, ".format(RMS_value[j])
-            ax_range = axP[i].axis()
-            axP[i].text(ax_range[0],ax_range[3]+Ylim/15,MRS_str[:-2],font_text)
         else:
             text_temp = {}
             RMS_value = []
@@ -499,8 +497,8 @@ def plot_E_N_U_NSAT(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, 
             MRS_str = "RMS="
             for j in range(len(RMS_value)):
                 MRS_str = MRS_str + "{:.2f}cm, ".format(RMS_value[j])
-            ax_range = axP[i].axis()
-            axP[i].text(ax_range[0],ax_range[3]+Ylim/15,MRS_str[:-2],font_text)
+        ax_range = axP[i].axis()
+        axP[i].text(ax_range[0],ax_range[3]+Ylim/15,MRS_str[:-2],font_text)
 
     #===Set legend===#
     axP[0].legend(Mode_list,prop=font_legend,

@@ -16,13 +16,13 @@ import Lib_Plot_AUG as PlotAUG
 #Setup Plot
 file_info_list = [
     "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Data/2021/AUG/BRUX-GEC3-FIXED-30.aug",
-    "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Data/2021/AUG_NOISE/BRUX-GEC3-FIXED-30-01.aug"
+    "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Data/2021/AUG_ZWD_NOISE/BRUX-GEC3-FIXED-30-02.aug"
     ] #[Raw, Model]
 
 start_time = [2021,11,11,2,0,0]
 end_time = [2021,11,11,24,0,0]
-plot_type = "ION"
-ylim = 0.1
+plot_type = "NSAT_RAW" # ION, ZWD, NSAT_RAW, NSAT_MODEL, NSAT_COM
+ylim = 0.05
 save_dir = ""
 show = True
 all = False
@@ -30,6 +30,7 @@ time_type = "GPST"
 delta_xlabel = 1
 sigma = 3
 sigma_num = 0
-Delay_model = 0
+delay_model = 0
+legend = False
 
-PlotAUG.plot_timeseries_aug_compare(File_info=file_info_list,Start=start_time,End=end_time,Plot_type=plot_type,Ylim=ylim,Save_dir=save_dir,Show=show,All=all,Time_type = time_type,Delta_xlabel = delta_xlabel,Sigma=sigma,Signum=sigma_num)
+PlotAUG.plot_timeseries_aug_compare(File_info=file_info_list,Start=start_time,End=end_time,Plot_type=plot_type,Ylim=ylim,Save_dir=save_dir,Show=show,All=all,Time_type = time_type,Delta_xlabel = delta_xlabel,Legend = legend,Sigma=sigma,Signum=sigma_num)
