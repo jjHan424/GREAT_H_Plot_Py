@@ -16,17 +16,23 @@ import Lib_Plot_Position as PlotPOS
 
 #Setup Plot
 file_info_list = [
-    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/2021315/BRUX-GEC3-FIXED-40-30-3600.flt", "BRUX", "9"],
-    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/2021315/BRUX-GEC3-FIXED-10-30-3600.flt", "BRUX", "2"],
-    # ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/2021315/BRUX-GEC3-FIXED-0-30-3600.flt", "BRUX", "0"],
+    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc/BRUX-GEC3-FIXED-101-30-3600.flt", "BRUX", "2"],
+    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc_WeightMax/BRUX-GEC3-FIXED--30-3600.flt", "BRUX", "0"],
+    # ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Project/2021315/client/BRUX-GEC3-FIXED-30-NoCons.flt", "BRUX", "NONE"],
     ] #[filedir, station_name, mode_name] for static station // #[filedir, ref_file, mode_name] for dynamic station
-
+site = "WARE"
+file_info_list = [["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/IonAcc/{}-GEC3-FIXED-No-30-3600.flt".format(site), site, "NONE"],
+                  ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/IonAcc/{}-GEC3-FIXED-OnlyIon-30-3600.flt".format(site), site, "ION"],
+                  ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc/{}-GEC3-FIXED-OnlyTrp-30-3600.flt".format(site), site, "TRP"]]
+for i in range(0,201):
+    temp_file = [os.path.join("/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/IonAcc","{}-GEC3-FIXED-{}-30-3600.flt".format(site,i)),site,"{:0>2}".format(i)]
+    file_info_list.append(temp_file)
 start_time = [2021,11,11,2,0,0]
 end_time = [2021,11,11,24,0,0]
 plot_type = ["E","N","U"]
-ylim = 0.1
-save_dir = ""
-show = True
+ylim = 0.5
+save_dir = "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/{}-ION".format(site)
+show = False
 fixed = False
 all = False
 mean = False

@@ -16,13 +16,13 @@ import Lib_Plot_AUG as PlotAUG
 #Setup Plot
 file_info_list = [
     "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Data/2021/AUG/BRUX-GEC3-FIXED-30.aug",
-    "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Data/2021/AUG_ZWD_NOISE/BRUX-GEC3-FIXED-30-02.aug"
+    "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/BRUX-GEC3-FIXED-30-10.aug"
     ] #[Raw, Model]
 
 start_time = [2021,11,11,2,0,0]
 end_time = [2021,11,11,24,0,0]
-plot_type = "NSAT_RAW" # ION, ZWD, NSAT_RAW, NSAT_MODEL, NSAT_COM
-ylim = 0.05
+plot_type = "ZWD" # ION, ZWD, NSAT_RAW, NSAT_MODEL, NSAT_COM
+ylim = 0.5
 save_dir = ""
 show = True
 all = False

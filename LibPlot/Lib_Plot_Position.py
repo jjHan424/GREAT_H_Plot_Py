@@ -255,7 +255,7 @@ def edit_mean(All_Data,Raw_Data):
             All_Data[cur_mode][cur_type] = All_Data[cur_mode][cur_type] - mean_temp
             # Raw_Data[cur_mode][cur_type] = Raw_Data[cur_mode][cur_type] - mean_temp
 
-def statistics(All_Data, Edit_Data, Delta_data, Start_time, Duration_time, Reconvergence, Recon_list):
+def statistics(All_Data, Edit_Data, Delta_data, Start_time, Duration_time, Reconvergence, Recon_list, Show = True, Save_dir = ""):
     num_epoch = Duration_time*3600/Delta_data + 1
     statistics_value_edit,statistics_value_all = {},{}
     type_list = ["E","N","U","NSAT"]
@@ -284,7 +284,7 @@ def statistics(All_Data, Edit_Data, Delta_data, Start_time, Duration_time, Recon
     #=== Reconvergence ===#
     # Set
     max_recon_time = 1800
-    cont_continue = 20
+    cont_continue = 10
     # Initialization
     con_horizontal,con_vertical,con_position = {},{},{}
     for cur_mode in Edit_Data.keys():
@@ -390,6 +390,36 @@ def statistics(All_Data, Edit_Data, Delta_data, Start_time, Duration_time, Recon
                                                 "{:>14}".format(int(np.mean(con_position[cur_mode][cur_accuracy])))
             print(Str_temp)
         # for cur_mode in Static_print.keys():
+    
+    #===Save Statistical Value===#
+    if not Show:
+        file_save = Save_dir+".csv"
+        while os.path.exists(file_save):
+            random = np.random.randint(0, 99, 1)
+            file_save = Save_dir+"-{:0>2}.csv".format(random[0])
+        file = open(file_save,'a')
+        head_str = "{:<10}{:>8}{:>8}{:>8}{:>8}{:>8}{:>8}".format("Mode,","Inter,","Fixed,","NSAT,","E,","N,","U,")
+        for cur_accuracy in Recon_list:
+            head_str = head_str+"{:>12},{:>12},{:>12},".format("{:0>2}-H".format(cur_accuracy),"{:0>2}-V".format(cur_accuracy),"{:0>2}-3D".format(cur_accuracy))
+        head_str = head_str[:-1]
+        file.write(head_str+"\n")
+        for cur_mode in Static_print.keys():
+            Mode_str = "{:<9},{:>6.1f}%,{:>6.1f}%,{:>7.2f},".format(cur_mode,\
+                                                                    Static_print[cur_mode]["Integrality"]*100,
+                                                                    Static_print[cur_mode]["Fixed/Fixed+Float"]*100,
+                                                                    Static_print[cur_mode]["MEAN"]["NSAT"],
+                                                                    )
+            for cur_type in type_enu:
+                Mode_str = Mode_str + "{:>7.2f},".format(Static_print[cur_mode]["RMS"][cur_type]*100)
+            for cur_accuracy in Recon_list:
+                Mode_str = Mode_str + "{:>12.2f},{:>12.2f},{:>12.2f},".format(int(np.mean(con_horizontal[cur_mode][cur_accuracy])),\
+                                                                              int(np.mean(con_vertical[cur_mode][cur_accuracy])),
+                                                                              int(np.mean(con_position[cur_mode][cur_accuracy])))
+
+            file.write(Mode_str[:-1]+"\n")
+        file.close()
+
+
 
     
 
@@ -562,7 +592,7 @@ def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [
         edit_mean(PLOT_ALL, PLOT_RAW)
 
     #=== Statistics ===#
-    statistics(PLOT_RAW,PLOT_ALL,Delta_data,Start,duration_time,Reconvergence,Recon_list)
+    statistics(PLOT_RAW,PLOT_ALL,Delta_data,Start,duration_time,Reconvergence,Recon_list,Show,Save_dir)
 
     #=== Plot ===#
     if Plot_type == ["E","N","U"]:

@@ -61,6 +61,16 @@ mpsh = 1/sqrt( hur); # m / sqrt(hour)
 mpspsh = 1/1/sqrt( hur); # (m/s) / sqrt(hour), 1*mpspsh~=1700*ugpsHz
 ppmpsh =  ppm/sqrt( hur); # ppm / sqrt(hour)
 
+#=== FONT SET ===#
+font_title = {'family' : 'Arial', 'weight' : 300, 'size' : 20}
+font_label = {'family' : 'Arial', 'weight' : 300, 'size' : 20}
+font_tick = {'family' : 'Arial', 'weight' : 300, 'size' : 35}
+font_legend = {'family' : 'Arial', 'weight' : 300, 'size' : 20}
+# font_legend = {'family' : 'Times New Roman', 'weight' : 600, 'size' : 15}
+font_text = {'family' : 'Arial','weight' : 300,'size'   : 20}
+xtick_size = 20
+color_list = ["#0099E5","#34BF49","#FF4C4C"]
+
 def xtick_min(time,year,mon,day,starttime,LastT,deltaT):
     if "+" in time:
         end_time = len(time)
