@@ -217,7 +217,7 @@ def plot_ION_G_E_C(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = T
     [label.set_fontsize(xtick_size) for label in labels]
     [label.set_fontname('Arial') for label in labels]
     axP[2].set_xlabel('GPS time (hour)',font_label)
-    axP[1].set_ylabel('Difference of Ionosphere Delay correction/m',font_label)
+    axP[1].set_ylabel('Difference of Ionosphere Delay correction (m)',font_label)
     axP[0].set_title('GPS',font_title)
     axP[1].set_title('GAL',font_title)
     axP[2].set_title('BDS',font_title)
@@ -269,7 +269,7 @@ def plot_ZWD(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True):
     [label.set_fontsize(xtick_size) for label in labels]
     [label.set_fontname('Arial') for label in labels]
     axP.set_xlabel('GPS time (hour)',font_label)
-    axP.set_ylabel('Difference of ZWD correction/m',font_label)
+    axP.set_ylabel('Difference of ZWD correction (m)',font_label)
 
     #===Set text===#
     MRS_str = "RMS = {:.2f} cm, MEAN = {:.2f} cm".format(np.sqrt(np.mean(np.array(Plot_Data["G"]["TRP1"])**2))*100,np.mean(Plot_Data["G"]["TRP1"]))    

@@ -1,9 +1,11 @@
 #!/usr/bin/python
 # author: zhShen
 # date: 20190520
+from calendar import month
 import glv
 from math import *
 import numpy as np
+import datetime
 
 
 
@@ -123,6 +125,13 @@ def mjd2gpst(day,sec):
 def ymd2doy(year,month,day,hour,minute,second):
     doy = floor(month*275/9)-floor((month+9)/12)*(floor((year-4*floor(year/4)+2)/3)+1)+day-30
     return doy
+
+def doy2ymd(year,doy):
+    basetime = datetime.date(year,1,1)
+    time_now = basetime + datetime.timedelta(doy - 1)
+    month = time_now.month
+    day = time_now.day
+    return [year,month,day]
 
 def transformlat(lng, lat):
     PI = 3.1415926535897932384626
