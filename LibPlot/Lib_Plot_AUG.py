@@ -336,7 +336,7 @@ def plot_NSAT_GEC(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = Tr
     plt.show()   
 
 
-def plot_timeseries_aug_compare(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5,Save_dir="",Show=True,All=False,Time_type = "GPST",Delta_xlabel = 1,Delay_model = 0,Legend = False,Sigma=3,Signum=0):
+def Plot_timeseries_aug_compare(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5,Save_dir="",Show=True,All=False,Time_type = "GPST",Delta_xlabel = 1,Delay_model = 0,Legend = False,Sigma=3,Signum=0):
     [start_week,start_sow] = tr.ymd2gpst(Start[0],Start[1],Start[2],Start[3],Start[4],Start[5])
     [end_week,end_sow] = tr.ymd2gpst(End[0],End[1],End[2],End[3],End[4],End[5])
     duration_time = ((end_week-start_week)*604800+(end_sow - start_sow))/3600

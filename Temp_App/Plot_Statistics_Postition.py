@@ -14,9 +14,9 @@ import draw as dr
 import trans as tr
 import glv
 
-file_name = "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/BRUX-ION-ConWeight.csv"
-
-plot_type = "Fixed" # Position Fixed Recon
+file_name = "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/FFMJ-ION-ConAccuracy.csv"
+file_name_temp = "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/FFMJ-ION.csv"
+plot_type = "Recon" # Position Fixed Recon
 recon_accuracy = 10
 #=== Read File ===#
 PLOT_ALL = {}
@@ -37,6 +37,25 @@ with open(file_name,"r") as f:
                     PLOT_ALL[head_list[i]].append(value[i])
                 else:
                     PLOT_ALL[head_list[i]].append(float(value[i]))
+
+PLOT_ALL_temp = {}
+with open(file_name_temp,"r") as f:
+    for line in f:
+        value = line.split(",")
+        if value[0] == "Mode":
+            head_list = []
+            for i in range(0,len(value)):
+                temp = value[i].replace(" ","")
+                head_list.append(temp)
+                PLOT_ALL_temp[temp] = []
+        else:
+            for i in range(0,len(value)):
+                if head_list[i] == "Inter" or head_list[i] == "Fixed":
+                    PLOT_ALL_temp[head_list[i]].append(float(value[i][:-1]))
+                elif head_list[i] == "Mode":
+                    PLOT_ALL_temp[head_list[i]].append(value[i])
+                else:
+                    PLOT_ALL_temp[head_list[i]].append(float(value[i]))
 
 #=== Plot ===#
 if plot_type == "Position":
@@ -78,12 +97,12 @@ if plot_type == "Position":
             framealpha=0,facecolor='none',ncol=3,numpoints=5,markerscale=3, 
             borderaxespad=0,bbox_to_anchor=(1,1.45),loc=1) 
     axP[1].set_ylabel("Positioning errors (cm)",glv.font_label)
-    axP[2].set_xlabel("Ionosphere accuracy (cm)",glv.font_label)
+    axP[2].set_xlabel("Prior ionosphere accuracy (cm)",glv.font_label)
     axP[0].set_title("East",glv.font_title)
     axP[1].set_title("North",glv.font_title)
     axP[2].set_title("Up",glv.font_title)
     xtick,xtick_label = [],[]
-    for i in range(0,41,4):
+    for i in range(0,201,20):
         xtick.append(i)
         xtick_label.append(int(i*0.5))
     axP[2].set_xticks(xtick)
@@ -103,9 +122,9 @@ if plot_type == "Fixed":
     
     axP.plot(np.array(PLOT_ALL["Fixed"][3:]) * np.array(PLOT_ALL["Inter"][3:]) / 100, color = glv.color_list[0],linewidth = 2)
     axP.set_ylabel("Fixed rate (%)",glv.font_label)
-    axP.set_xlabel("Atmosphere accuracy (cm)",glv.font_label)
+    axP.set_xlabel("Prior atmosphere accuracy (cm)",glv.font_label)
     xtick,xtick_label = [],[]
-    for i in range(0,81,8):
+    for i in range(0,201,20):
         xtick.append(i)
         xtick_label.append(int(i*0.5))
     axP.set_xticks(xtick)
@@ -114,7 +133,7 @@ if plot_type == "Fixed":
     [label.set_fontsize(glv.xtick_size) for label in labels]
     [label.set_fontname('Arial') for label in labels]
     PLOT_ALL = {}
-    file_name = "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/BRUX-TRP-ConWeight.csv"
+    file_name = "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/WARE-TRP-ConAccuracy.csv"
     with open(file_name,"r") as f:
         for line in f:
             value = line.split(",")
@@ -147,35 +166,37 @@ if plot_type == "Recon":
     #     axP[plot_list[cur_type]].axhline(y = PLOT_ALL[cur_type][1],color = glv.color_list[1],ls='--',linewidth = 3)
     #     axP[plot_list[cur_type]].axhline(y = PLOT_ALL[cur_type][2],color = glv.color_list[2],ls='--',linewidth = 3)
     accuracy_list = np.array(range(0,81))
-    axP[0].set_ylim(0,1000)
+    axP[0].set_ylim(0,700)
     axP[0].plot(PLOT_ALL["{:0>2}-H".format(recon_accuracy)][3:], color = 'k',linewidth = 2)
+    axP[0].plot(PLOT_ALL_temp["{:0>2}-H".format(recon_accuracy)][3:], color = 'gray',linewidth = 2)
     axP[0].set_ylabel("Reconvergence time (s)",glv.font_label)
-    axP[0].set_xlabel("Tropsphere accuracy (cm)",glv.font_label)
+    axP[0].set_xlabel("Prior ionosphere accuracy (cm)",glv.font_label)
     axP[0].set_title("Horizontal",glv.font_title)
     axP[0].axhline(y = PLOT_ALL["{:0>2}-H".format(recon_accuracy)][0],color = glv.color_list[0],ls='--',linewidth = 3)
     axP[0].axhline(y = PLOT_ALL["{:0>2}-H".format(recon_accuracy)][1],color = glv.color_list[1],ls='--',linewidth = 3)
     axP[0].axhline(y = PLOT_ALL["{:0>2}-H".format(recon_accuracy)][2],color = glv.color_list[2],ls='--',linewidth = 3)
-    index_temp = np.array(PLOT_ALL["{:0>2}-H".format(recon_accuracy)][3:]) > PLOT_ALL["{:0>2}-H".format(recon_accuracy)][0]
-    temp_acc = accuracy_list[index_temp]
-    if temp_acc.size > 0:
-        axP[0].axvline(x = temp_acc[0], ymin = 0, ymax =  PLOT_ALL["{:0>2}-H".format(recon_accuracy)][0]/1000,color = glv.color_list[0],ls='--',linewidth = 3)
-        ax_range = axP[0].axis()
-        axP[0].text(temp_acc[0]+1,50,"{:.1f}cm".format(temp_acc[0]*0.5),glv.font_text)
+    # index_temp = np.array(PLOT_ALL["{:0>2}-H".format(recon_accuracy)][3:]) > PLOT_ALL["{:0>2}-H".format(recon_accuracy)][0]
+    # temp_acc = accuracy_list[index_temp]
+    # if temp_acc.size > 0:
+    #     axP[0].axvline(x = temp_acc[0], ymin = 0, ymax =  PLOT_ALL["{:0>2}-H".format(recon_accuracy)][0]/1000,color = glv.color_list[0],ls='--',linewidth = 3)
+    #     ax_range = axP[0].axis()
+    #     axP[0].text(temp_acc[0]+1,50,"{:.1f}cm".format(temp_acc[0]*0.5),glv.font_text)
 
     axP[1].axhline(y = PLOT_ALL["{:0>2}-V".format(recon_accuracy)][0],color = glv.color_list[0],ls='--',linewidth = 3)
     axP[1].axhline(y = PLOT_ALL["{:0>2}-V".format(recon_accuracy)][1],color = glv.color_list[1],ls='--',linewidth = 3)
     axP[1].axhline(y = PLOT_ALL["{:0>2}-V".format(recon_accuracy)][2],color = glv.color_list[2],ls='--',linewidth = 3)
     axP[1].plot(PLOT_ALL["{:0>2}-V".format(recon_accuracy)][3:], color = 'k',linewidth = 2)
-    index_temp = np.array(PLOT_ALL["{:0>2}-V".format(recon_accuracy)][3:]) > PLOT_ALL["{:0>2}-V".format(recon_accuracy)][0]
-    temp_acc = accuracy_list[index_temp]
-    axP[1].axvline(x = temp_acc[0], ymin = 0, ymax =  PLOT_ALL["{:0>2}-V".format(recon_accuracy)][0]/1000,color = glv.color_list[0],ls='--',linewidth = 3)
-    ax_range = axP[1].axis()
-    axP[1].text(temp_acc[0]+1,50,"{:.1f}cm".format(temp_acc[0]*0.5),glv.font_text)
-    axP[1].set_xlabel("Tropsphere accuracy (cm)",glv.font_label)
+    axP[1].plot(PLOT_ALL_temp["{:0>2}-V".format(recon_accuracy)][3:], color = 'gray',linewidth = 2)
+    # index_temp = np.array(PLOT_ALL["{:0>2}-V".format(recon_accuracy)][3:]) > PLOT_ALL["{:0>2}-V".format(recon_accuracy)][0]
+    # temp_acc = accuracy_list[index_temp]
+    # axP[1].axvline(x = temp_acc[0], ymin = 0, ymax =  PLOT_ALL["{:0>2}-V".format(recon_accuracy)][0]/1000,color = glv.color_list[0],ls='--',linewidth = 3)
+    # ax_range = axP[1].axis()
+    # axP[1].text(temp_acc[0]+1,50,"{:.1f}cm".format(temp_acc[0]*0.5),glv.font_text)
+    axP[1].set_xlabel("Prior ionosphere accuracy (cm)",glv.font_label)
     axP[1].set_title("Vertical",glv.font_title)
     
     xtick,xtick_label = [],[]
-    for i in range(0,81,8):
+    for i in range(0,201,20):
         xtick.append(i)
         xtick_label.append(int(i*0.5))
     axP[0].set_xticks(xtick)
@@ -190,4 +211,4 @@ if plot_type == "Recon":
 
 
 plt.show()
-# plt.savefig("/Users/hanjunjie/Gap1/汇报/Image/BRUX-ION-ConWeight-Fixed.jpg",dpi = 600)
+# plt.savefig("/Users/hanjunjie/Gap1/汇报/Image/FFMJ-ION-ConAccuracy-Reconvergence_ION.jpg",dpi = 600)

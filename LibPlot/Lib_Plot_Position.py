@@ -1,4 +1,5 @@
 # from asyncore import write
+# from msilib.schema import File
 from multiprocessing.dummy import DummyProcess
 import os
 from socket import SHUT_WR
@@ -284,7 +285,7 @@ def statistics(All_Data, Edit_Data, Delta_data, Start_time, Duration_time, Recon
     #=== Reconvergence ===#
     # Set
     max_recon_time = 1800
-    cont_continue = 10
+    cont_continue = 20
     # Initialization
     con_horizontal,con_vertical,con_position = {},{},{}
     for cur_mode in Edit_Data.keys():
@@ -538,7 +539,7 @@ def plot_E_N_U_NSAT(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, 
         plt.show()
     plt.close()            
 
-def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [], Ylim = 0.2, Save_dir = "", Show = True, Fixed = False, All = False, Time_type = "", Delta_xlabel = 1, Mean = False, Sigma = 3, Signum = 0, Delta_data = 30, Reconvergence = 3600, Recon_list = []):
+def Plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [], Ylim = 0.2, Save_dir = "", Show = True, Fixed = False, All = False, Time_type = "", Delta_xlabel = 1, Mean = False, Sigma = 3, Signum = 0, Delta_data = 30, Reconvergence = 3600, Recon_list = []):
     file_num = len(File_info)
     [start_week,start_sow] = tr.ymd2gpst(Start[0],Start[1],Start[2],Start[3],Start[4],Start[5])
     [end_week,end_sow] = tr.ymd2gpst(End[0],End[1],End[2],End[3],End[4],End[5])
@@ -600,4 +601,272 @@ def plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [
     if Plot_type == ["E","N","U","NSAT"]:
         plot_E_N_U_NSAT(Plot_Data=PLOT_ALL, Plot_type=Plot_type, Mode_list=Mode_list, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show)
 
+def plot_percent_vertical(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, Percentage = 0.0, Duration_time = 3600, Reconvergence = 3600, Start = [], Delta_data = 30, XlabelSet = [], Show = True):
+    #=== Data convert===#
+    PLOT_ALL,PLOT_RAW = {},{}
+    for cur_mode in Plot_Data.keys():
+        PLOT_ALL[cur_mode],PLOT_RAW[cur_mode] = {},{}
+        PLOT_ALL[cur_mode]["TIME"],PLOT_RAW[cur_mode]["TIME"] = [],[]
+        for i in Plot_Data[cur_mode].keys():
+            time_np = np.array(Plot_Data[cur_mode][i]["TIME"])
+            e_np,n_np,u_np = np.array(Plot_Data[cur_mode][i]["E"]),np.array(Plot_Data[cur_mode][i]["N"]),np.array(Plot_Data[cur_mode][i]["U"])
+            horizontal = np.sqrt(e_np**2+n_np**2)*100
+            vertical = np.abs(u_np)*100
+            position = np.sqrt(e_np**2+n_np**2+u_np**2)*100
+            cur_time = Start[3] * 3600
+            for j in range(int(Duration_time*3600 / Reconvergence)):
+                cur_time = Start[3] * 3600 + j * Reconvergence
+                con_position_num,con_horizontal_num,con_vertical_num = 0,0,0
+                while cur_time < Start[3] * 3600 + (j+1) * Reconvergence:
+                    cur_time_hour = cur_time
+                    cur_time_index = cur_time_hour - (Start[3] * 3600 + j * Reconvergence)
+                    find_time_index = time_np == cur_time / 3600
+                    cur_vertical = vertical[find_time_index]
+                    cur_horizontal = horizontal[find_time_index]
+                    if cur_vertical.size != 1:
+                        cur_time = cur_time + Delta_data
+                        continue
+                    if cur_time_index not in PLOT_ALL[cur_mode].keys():
+                        PLOT_ALL[cur_mode][cur_time_index],PLOT_RAW[cur_mode][cur_time_index] = [],[]
+                    PLOT_ALL[cur_mode][cur_time_index].append(cur_vertical[0])
+                    PLOT_RAW[cur_mode][cur_time_index].append(cur_horizontal[0])
+                    if cur_time_index not in PLOT_ALL[cur_mode]["TIME"]:
+                        PLOT_ALL[cur_mode]["TIME"].append(cur_time_index)
+                    cur_time = cur_time + Delta_data
+    
+    for cur_mode in PLOT_ALL.keys():
+        PLOT_ALL[cur_mode]["Vertical"],PLOT_ALL[cur_mode]["Horizontal"] = [],[]
+        for cur_time in PLOT_ALL[cur_mode].keys():
+            if cur_time == "TIME" or cur_time == "Vertical" or cur_time == "Horizontal":
+                continue
+            if Percentage == 0:
+                PLOT_ALL[cur_mode]["Vertical"].append(np.mean(PLOT_ALL[cur_mode][cur_time]))
+                PLOT_ALL[cur_mode]["Horizontal"].append(np.mean(PLOT_RAW[cur_mode][cur_time]))
+            else:
+                temp = np.array(PLOT_ALL[cur_mode][cur_time])
+                temp.sort()
+                PLOT_ALL[cur_mode]["Vertical"].append(temp[int((temp.size) * Percentage)])
+                temp = np.array(PLOT_RAW[cur_mode][cur_time])
+                temp.sort()
+                PLOT_ALL[cur_mode]["Horizontal"].append(temp[int((temp.size) * Percentage)])
+    #=== Plot ===#
+    figP,axP = plt.subplots(1,1,figsize=(6,6),sharey=False,sharex=True)
+    j = 0
+    for cur_mode in PLOT_ALL.keys():
+        axP.plot(np.array(PLOT_ALL[cur_mode]["TIME"])/60,PLOT_ALL[cur_mode]["Vertical"],linewidth = 2,color = color_list[j])
+        j = j + 1
+    #===Set Label===#
+    
+    # axP.set_xticklabels(XlabelSet[0])
+    # axP.set_xticks(XlabelSet[1])
+    labels = axP.get_yticklabels() + axP.get_xticklabels()
+    [label.set_fontsize(xtick_size) for label in labels]
+    [label.set_fontname('Arial') for label in labels]
+    axP.set_ylabel("Horizontal errors (cm)",font_label)
+    axP.set_xlabel("GPS time (min)",font_label)
+    axP.legend(Mode_list,prop=font_legend,
+            framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=3, 
+            borderaxespad=0,bbox_to_anchor=(1,1.1),loc=1)
+    leg = axP.get_legend()
+    for legobj in leg.legendHandles:
+        legobj.set_linewidth(5)
+    plt.show()
 
+def plot_percent_horizontal(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, Percentage = 0.0, Duration_time = 3600, Reconvergence = 3600, Start = [], Delta_data = 30, XlabelSet = [], Show = True):
+    #=== Data convert===#
+    PLOT_ALL,PLOT_RAW = {},{}
+    for cur_mode in Plot_Data.keys():
+        PLOT_ALL[cur_mode],PLOT_RAW[cur_mode] = {},{}
+        PLOT_ALL[cur_mode]["TIME"],PLOT_RAW[cur_mode]["TIME"] = [],[]
+        for i in Plot_Data[cur_mode].keys():
+            time_np = np.array(Plot_Data[cur_mode][i]["TIME"])
+            e_np,n_np,u_np = np.array(Plot_Data[cur_mode][i]["E"]),np.array(Plot_Data[cur_mode][i]["N"]),np.array(Plot_Data[cur_mode][i]["U"])
+            horizontal = np.sqrt(e_np**2+n_np**2)*100
+            vertical = np.abs(u_np)*100
+            position = np.sqrt(e_np**2+n_np**2+u_np**2)*100
+            cur_time = Start[3] * 3600
+            for j in range(int(Duration_time*3600 / Reconvergence)):
+                cur_time = Start[3] * 3600 + j * Reconvergence
+                con_position_num,con_horizontal_num,con_vertical_num = 0,0,0
+                while cur_time < Start[3] * 3600 + (j+1) * Reconvergence:
+                    cur_time_hour = cur_time
+                    cur_time_index = cur_time_hour - (Start[3] * 3600 + j * Reconvergence)
+                    find_time_index = time_np == cur_time / 3600
+                    cur_vertical = vertical[find_time_index]
+                    cur_horizontal = horizontal[find_time_index]
+                    if cur_vertical.size != 1:
+                        cur_time = cur_time + Delta_data
+                        continue
+                    if cur_time_index not in PLOT_ALL[cur_mode].keys():
+                        PLOT_ALL[cur_mode][cur_time_index],PLOT_RAW[cur_mode][cur_time_index] = [],[]
+                    PLOT_ALL[cur_mode][cur_time_index].append(cur_vertical[0])
+                    PLOT_RAW[cur_mode][cur_time_index].append(cur_horizontal[0])
+                    if cur_time_index not in PLOT_ALL[cur_mode]["TIME"]:
+                        PLOT_ALL[cur_mode]["TIME"].append(cur_time_index)
+                    cur_time = cur_time + Delta_data
+    
+    for cur_mode in PLOT_ALL.keys():
+        PLOT_ALL[cur_mode]["Vertical"],PLOT_ALL[cur_mode]["Horizontal"] = [],[]
+        for cur_time in PLOT_ALL[cur_mode].keys():
+            if cur_time == "TIME" or cur_time == "Vertical" or cur_time == "Horizontal":
+                continue
+            if Percentage == 0:
+                PLOT_ALL[cur_mode]["Vertical"].append(np.mean(PLOT_ALL[cur_mode][cur_time]))
+                PLOT_ALL[cur_mode]["Horizontal"].append(np.mean(PLOT_RAW[cur_mode][cur_time]))
+            else:
+                temp = np.array(PLOT_ALL[cur_mode][cur_time])
+                temp.sort()
+                PLOT_ALL[cur_mode]["Vertical"].append(temp[int((temp.size) * Percentage)])
+                temp = np.array(PLOT_RAW[cur_mode][cur_time])
+                temp.sort()
+                PLOT_ALL[cur_mode]["Horizontal"].append(temp[int((temp.size) * Percentage)])
+    #=== Plot ===#
+    figP,axP = plt.subplots(1,1,figsize=(6,6),sharey=False,sharex=True)
+    j = 0
+    for cur_mode in PLOT_ALL.keys():
+        axP.plot(np.array(PLOT_ALL[cur_mode]["TIME"])/60,PLOT_ALL[cur_mode]["Horizontal"],linewidth = 2,color = color_list[j])
+        j = j + 1
+    #===Set Label===#
+    
+    # axP.set_xticklabels(XlabelSet[0])
+    # axP.set_xticks(XlabelSet[1])
+    labels = axP.get_yticklabels() + axP.get_xticklabels()
+    [label.set_fontsize(xtick_size) for label in labels]
+    [label.set_fontname('Arial') for label in labels]
+    axP.set_ylabel("Vertical errors (cm)",font_label)
+    axP.set_xlabel("GPS time (min)",font_label)
+    axP.legend(Mode_list,prop=font_legend,
+            framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=3, 
+            borderaxespad=0,bbox_to_anchor=(1,1.1),loc=1)
+    leg = axP.get_legend()
+    for legobj in leg.legendHandles:
+        legobj.set_linewidth(5)
+    plt.show()
+
+def plot_percent_HV(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, Percentage = 0.0, Duration_time = 3600, Reconvergence = 3600, Start = [], Delta_data = 30, XlabelSet = [], Show = True):
+    #=== Data convert===#
+    PLOT_ALL,PLOT_RAW = {},{}
+    for cur_mode in Plot_Data.keys():
+        PLOT_ALL[cur_mode],PLOT_RAW[cur_mode] = {},{}
+        PLOT_ALL[cur_mode]["TIME"],PLOT_RAW[cur_mode]["TIME"] = [],[]
+        for i in Plot_Data[cur_mode].keys():
+            time_np = np.array(Plot_Data[cur_mode][i]["TIME"])
+            e_np,n_np,u_np = np.array(Plot_Data[cur_mode][i]["E"]),np.array(Plot_Data[cur_mode][i]["N"]),np.array(Plot_Data[cur_mode][i]["U"])
+            horizontal = np.sqrt(e_np**2+n_np**2)*100
+            vertical = np.abs(u_np)*100
+            position = np.sqrt(e_np**2+n_np**2+u_np**2)*100
+            cur_time = Start[3] * 3600
+            for j in range(int(Duration_time*3600 / Reconvergence)):
+                cur_time = Start[3] * 3600 + j * Reconvergence
+                con_position_num,con_horizontal_num,con_vertical_num = 0,0,0
+                while cur_time < Start[3] * 3600 + (j+1) * Reconvergence:
+                    cur_time_hour = cur_time
+                    cur_time_index = cur_time_hour - (Start[3] * 3600 + j * Reconvergence)
+                    find_time_index = time_np == cur_time / 3600
+                    cur_vertical = vertical[find_time_index]
+                    cur_horizontal = horizontal[find_time_index]
+                    if cur_vertical.size != 1:
+                        cur_time = cur_time + Delta_data
+                        continue
+                    if cur_time_index not in PLOT_ALL[cur_mode].keys():
+                        PLOT_ALL[cur_mode][cur_time_index],PLOT_RAW[cur_mode][cur_time_index] = [],[]
+                    PLOT_ALL[cur_mode][cur_time_index].append(cur_vertical[0])
+                    PLOT_RAW[cur_mode][cur_time_index].append(cur_horizontal[0])
+                    if cur_time_index not in PLOT_ALL[cur_mode]["TIME"]:
+                        PLOT_ALL[cur_mode]["TIME"].append(cur_time_index)
+                    cur_time = cur_time + Delta_data
+    
+    for cur_mode in PLOT_ALL.keys():
+        PLOT_ALL[cur_mode]["Vertical"],PLOT_ALL[cur_mode]["Horizontal"] = [],[]
+        for cur_time in PLOT_ALL[cur_mode].keys():
+            if cur_time == "TIME" or cur_time == "Vertical" or cur_time == "Horizontal":
+                continue
+            if Percentage == 0:
+                PLOT_ALL[cur_mode]["Vertical"].append(np.mean(PLOT_ALL[cur_mode][cur_time]))
+                PLOT_ALL[cur_mode]["Horizontal"].append(np.mean(PLOT_RAW[cur_mode][cur_time]))
+            else:
+                temp = np.array(PLOT_ALL[cur_mode][cur_time])
+                temp.sort()
+                PLOT_ALL[cur_mode]["Vertical"].append(temp[int((temp.size) * Percentage)])
+                temp = np.array(PLOT_RAW[cur_mode][cur_time])
+                temp.sort()
+                PLOT_ALL[cur_mode]["Horizontal"].append(temp[int((temp.size) * Percentage)])
+    #=== Plot ===#
+    figP,axP = plt.subplots(1,2,figsize=(12,6),sharey=False,sharex=True)
+    j = 0
+    for cur_mode in PLOT_ALL.keys():
+        axP[0].plot(np.array(PLOT_ALL[cur_mode]["TIME"])/60,PLOT_ALL[cur_mode]["Horizontal"],linewidth = 2,color = color_list[j])
+        axP[1].plot(np.array(PLOT_ALL[cur_mode]["TIME"])/60,PLOT_ALL[cur_mode]["Vertical"],linewidth = 2,color = color_list[j])
+        j = j + 1
+    #===Set Label===#
+    
+    # axP.set_xticklabels(XlabelSet[0])
+    # axP.set_xticks(XlabelSet[1])
+    labels = axP[0].get_yticklabels() + axP[0].get_xticklabels() + axP[1].get_yticklabels() + axP[1].get_xticklabels()
+    [label.set_fontsize(xtick_size) for label in labels]
+    [label.set_fontname('Arial') for label in labels]
+    axP[1].set_ylabel("Vertical errors (cm)",font_label)
+    axP[0].set_ylabel("Horizontal errors (cm)",font_label)
+    axP[1].set_xlabel("GPS time (min)",font_label)
+    axP[1].legend(Mode_list,prop=font_legend,
+            framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=3, 
+            borderaxespad=0,bbox_to_anchor=(1,1.1),loc=1)
+    leg = axP[1].get_legend()
+    for legobj in leg.legendHandles:
+        legobj.set_linewidth(5)
+    plt.show()
+
+def Plot_percent_position(File_info = [], Start = [], End = [], Plot_type = [], Ylim = 0.2, Percentage = 0.0, Save_dir = "", Show = True, Fixed = False, All = False, Time_type = "", Delta_xlabel = 1, Mean = False, Sigma = 3, Signum = 0, Delta_data = 30, Reconvergence = 3600, Recon_list = []):
+    mode_num = len(File_info)
+    [start_week,start_sow] = tr.ymd2gpst(Start[0],Start[1],Start[2],Start[3],Start[4],Start[5])
+    [end_week,end_sow] = tr.ymd2gpst(End[0],End[1],End[2],End[3],End[4],End[5])
+    duration_time = ((end_week-start_week)*604800+(end_sow - start_sow))/3600
+
+    #=== Load data & XYZ2ENU ===#
+    Data_All = {}
+    for i in range(mode_num):   
+        data_raw_temp = loaddata(File_info[i][0],[start_week,start_sow],[end_week,end_sow])
+        data_mode_temp = {}
+        for j in range(len(File_info[i]) - 2):
+            if File_info[i][-2] not in TRUE_Position:
+                continue
+            data_raw_temp = loaddata(File_info[i][j],[start_week,start_sow],[end_week,end_sow])
+            data_mode_temp[j] = XYZ2ENU_static(XYZ = data_raw_temp,REF_XYZ=TRUE_Position[File_info[i][-2]])
+        Data_All[File_info[i][-1]] = data_mode_temp
+
+    # Initialization
+    PLOT_ALL,PLOT_RAW = {},{}
+    type_list = ["E","N","U","AMB","TIME"]
+    [XLabel,XTick,cov_time,begT,LastT]=glv.xtick(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
+    for i in range(mode_num):
+        if File_info[i][-1] not in PLOT_ALL:
+            PLOT_ALL[File_info[i][-1]],PLOT_RAW[File_info[i][-1]] = {},{}
+            for j in range(len(File_info[i]) - 2):
+                PLOT_ALL[File_info[i][-1]][j],PLOT_RAW[File_info[i][-1]][j] = {},{}
+                for cur_type in type_list:
+                    PLOT_ALL[File_info[i][-1]][j][cur_type],PLOT_RAW[File_info[i][-1]][j][cur_type] = [],[]
+    # Convert
+    for i in range(mode_num):
+        for j in range(len(File_info[i]) - 2):
+            for cur_time in Data_All[File_info[i][-1]][j]:
+                plot_time = ((cur_time - cov_time) / 3600) % 24
+                if ((plot_time >= Start[3] and plot_time <= (Start[3]+duration_time)) or All):
+                    if(Fixed and Data_All[File_info[i][-1]][j][cur_time]["AMB"] == 0):
+                        continue
+                    PLOT_ALL[File_info[i][-1]][j]["TIME"].append(plot_time)
+                    PLOT_RAW[File_info[i][-1]][j]["TIME"].append(plot_time)
+                    for cur_type in type_list:
+                        if cur_type == "TIME":
+                            continue
+                        PLOT_ALL[File_info[i][-1]][j][cur_type].append(Data_All[File_info[i][-1]][j][cur_time][cur_type])
+                        PLOT_RAW[File_info[i][-1]][j][cur_type].append(Data_All[File_info[i][-1]][j][cur_time][cur_type])
+    Mode_list = [File_info[i][-1] for i in range(mode_num)]
+
+    #=== Plot ===#
+    if Plot_type == "Horizontal":
+        plot_percent_horizontal(Plot_Data=PLOT_ALL, Plot_type=Plot_type, Mode_list=Mode_list, Ylim=Ylim, Percentage = Percentage, Duration_time = duration_time, Reconvergence = Reconvergence, Delta_data = Delta_data, Start = Start, XlabelSet = [XLabel,XTick], Show=Show)
+    if Plot_type == "Vertical":
+        plot_percent_vertical(Plot_Data=PLOT_ALL, Plot_type=Plot_type, Mode_list=Mode_list, Ylim=Ylim, Percentage = Percentage, Duration_time = duration_time, Reconvergence = Reconvergence, Delta_data = Delta_data, Start = Start, XlabelSet = [XLabel,XTick], Show=Show)
+    if Plot_type == "HV":
+        plot_percent_HV(Plot_Data=PLOT_ALL, Plot_type=Plot_type, Mode_list=Mode_list, Ylim=Ylim, Percentage = Percentage, Duration_time = duration_time, Reconvergence = Reconvergence, Delta_data = Delta_data, Start = Start, XlabelSet = [XLabel,XTick], Show=Show)
+                    
