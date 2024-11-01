@@ -14,16 +14,19 @@ import trans as tr
 import Lib_Plot_Position as PlotPOS
 
 file_info_list = [
-    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/IonAcc/BRUX-GEC3-FIXED-ION-10-30-3600.flt","BRUX","10"],
-    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/IonAcc/BRUX-GEC3-FIXED-ION-200-30-3600.flt","BRUX","20"],
+    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc/FFMJ-GEC3-FIXED-TRP-10-30-3600.flt","FFMJ","5"],
+    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc/FFMJ-GEC3-FIXED-TRP-20-30-3600.flt","FFMJ","10"],
+    # ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc/FFMJ-GEC3-FIXED-TRP-25-30-3600.flt","FFMJ","30"],
+    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc/FFMJ-GEC3-FIXED-TRP-60-30-3600.flt","FFMJ","30"],
+    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc/FFMJ-GEC3-FIXED-TRP-100-30-3600.flt","FFMJ","50"],
 ] #[[File1, File2, ..., Filen, Site, Mode1]]
 
 start_time = [2021,11,11,2,0,0]
 end_time = [2021,11,11,24,0,0]
-plot_type = "Vertical" #Horizontal Vertical HV
+plot_type = "HV" #Horizontal Vertical HV
 save_dir = ""
 ylim = 0.5
-percentage = 0.8
+percentage = 0.95
 show = True
 fixed = False
 all = False

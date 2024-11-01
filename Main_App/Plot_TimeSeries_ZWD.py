@@ -14,18 +14,18 @@ import trans as tr
 import Lib_Plot_ZWD as PlotZWD
 
 #Setup Plot
-# file_info_list = [
-#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/EBRE-GE-FIXED-30.flt","/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/ebre3100.21zpd","EBRE"],
-#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/KOS1-GE-FIXED-30.flt","/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/kos13100.21zpd","KOS1"]
-#     ] #[Raw, Ref, Mode] #[file,mode]
 file_info_list = [
-    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/KOS1-GE-FIXED-30.flt","PPP-RTK"],
-    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/kos13100.21zpd","REF"]
+    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/EBRE-GE-FIXED-30.flt","/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/ebre3100.21zpd","EBRE"],
+    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/KOS1-GE-FIXED-30.flt","/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/kos13100.21zpd","KOS1"]
     ] #[Raw, Ref, Mode] #[file,mode]
+# file_info_list = [
+#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/KOS1-GE-FIXED-30.flt","PPP-RTK"],
+#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/kos13100.21zpd","REF"]
+#     ] #[Raw, Ref, Mode] #[file,mode]
 
-start_time = [2021,11,6,4,0,0]
+start_time = [2021,11,6,2,0,0]
 end_time = [2021,11,6,24,0,0]
-plot_type = "RAW" # DELTA RAW
+plot_type = "DELTA" # DELTA RAW
 ylim = 20 # mm for Delta
 save_dir = ""
 fixed = False

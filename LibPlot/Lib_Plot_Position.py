@@ -795,8 +795,8 @@ def plot_percent_HV(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, 
     figP,axP = plt.subplots(1,2,figsize=(12,6),sharey=False,sharex=True)
     j = 0
     for cur_mode in PLOT_ALL.keys():
-        axP[0].plot(np.array(PLOT_ALL[cur_mode]["TIME"])/60,PLOT_ALL[cur_mode]["Horizontal"],linewidth = 2,color = color_list[j])
-        axP[1].plot(np.array(PLOT_ALL[cur_mode]["TIME"])/60,PLOT_ALL[cur_mode]["Vertical"],linewidth = 2,color = color_list[j])
+        axP[0].plot(np.array(PLOT_ALL[cur_mode]["TIME"])/60,PLOT_ALL[cur_mode]["Horizontal"],linewidth = 2)
+        axP[1].plot(np.array(PLOT_ALL[cur_mode]["TIME"])/60,PLOT_ALL[cur_mode]["Vertical"],linewidth = 2)
         j = j + 1
     #===Set Label===#
     
@@ -808,6 +808,7 @@ def plot_percent_HV(Plot_Data = {}, Plot_type = [], Mode_list = [], Ylim = 0.5, 
     axP[1].set_ylabel("Vertical errors (cm)",font_label)
     axP[0].set_ylabel("Horizontal errors (cm)",font_label)
     axP[1].set_xlabel("GPS time (min)",font_label)
+    axP[0].set_xlabel("GPS time (min)",font_label)
     axP[1].legend(Mode_list,prop=font_legend,
             framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=3, 
             borderaxespad=0,bbox_to_anchor=(1,1.1),loc=1)
