@@ -117,10 +117,33 @@ def ymd2gpst(year,month,day,hour,minute,second):
         sow = round(sow)
     return (w,sow)
     
-def mjd2gpst(day,sec):
-    w = floor((day - 44244) / 7)
-    sow = sec + ((day - 44244) / 7 - w) * 86400
+# def mjd2gpst(day,sec):
+#     w = floor((day - 44244) / 7)
+#     sow = sec + ((day - 44244) / 7 - w) * 86400
+#     return(w,sow)
+
+def mjd2gpst(mjd):
+    w = int((mjd - 44244) / 7)
+    sow = ((mjd - 44244) *3600*24 - w * 3600 * 24 * 7)
     return(w,sow)
+
+def mjd2ymd(mjd):
+    a = int(mjd+2400000.5+0.5)
+    b = a+1537
+    c = int((b - 122.1)/365.25)
+    d = int(365.25*c)
+    e = int((b-d)/30.6001)
+    D = b-d-int(30.6001*e)+mjd+2400000.5+0.5-int(mjd+2400000.5+0.5)
+    M = e - 1 - 12*int(e/14)
+    Y = c-4715-int((7+M)/10)
+    return ([Y, M, D])
+
+def ymd2mjd(Year,Mon,Day):
+    if Mon <= 2:
+        Year = Year - 1
+        Mon = Mon + 12
+    mjd = int(365.25*Year)+int(30.6001*(Mon+1))+Day-679019
+    return mjd
 
 def ymd2doy(year,month,day,hour,minute,second):
     doy = floor(month*275/9)-floor((month+9)/12)*(floor((year-4*floor(year/4)+2)/3)+1)+day-30

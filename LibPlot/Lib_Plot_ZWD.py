@@ -38,7 +38,7 @@ font_legend = {'family' : 'Arial', 'weight' : 300, 'size' : 20}
 # font_legend = {'family' : 'Times New Roman', 'weight' : 600, 'size' : 15}
 font_text = {'family' : 'Arial','weight' : 300,'size'   : 20}
 xtick_size = 20
-color_list = ["#0099E5","#34BF49","#FF4C4C"]
+color_list = ["#0099E5","#34BF49","#FF4C4C"] #Blue #Green # Red ##f2af00 Yellow
 # color_list = ["#0085c3","#7ab800","#71c6c1","#dc5034","#009bbb",
 #               "#b7295a","#6e2585","#f2af00","#5482ab","#ce1126",
 #               "#444444","#eeeeee"]
