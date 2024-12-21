@@ -16,26 +16,25 @@ import Lib_Plot_Position as PlotPOS
 
 #Setup Plot
 file_info_list = [
-    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc/BRUX-GEC3-FIXED-101-30-3600.flt", "BRUX", "2"],
-    ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc_WeightMax/BRUX-GEC3-FIXED--30-3600.flt", "BRUX", "0"],
-    # ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Project/2021315/client/BRUX-GEC3-FIXED-30-NoCons.flt", "BRUX", "NONE"],
+    # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2021162/client/GAMG-GEC3-FLOAT-30-WUM-ULTRALSP3.flt", "GAMG", "WUM1"],
+    # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2021162/client/GAMG-GEC3-FLOAT-30-WUM-KIN.flt", "GAMG", "WUM-GEC"],
+    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD_KINEMATIC/PPPRTK/2023073/client/TIT2-GEC3-FIXED-30-3600.flt", "TIT2", "PPP"],
+    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPPRTK/2023073/client/TIT2-GEC3-FIXED-30-3600.flt", "TIT2", "PPPRTK"],
+    # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPP/2023073/client/KOS1-GEC3-FIXED-30-3600.flt", "BRUX", "GFZ"],
+    # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2024282/client/GAMG-GEC3-FLOAT-30.flt", "GAMG", "GFZ-GEC"],
+    # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2021162/client/GAMG-GEC3-FLOAT-30-GFZ-KIN.flt", "GAMG", "GFZ-GEC"],
+    # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2021162/client/GAMG-GEC3-FLOAT-30-COD-KIN.flt", "GAMG", "COD"],
+    # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2023341/server/HKSC-GEC2-FIXED-30.flt", "HKSC", "NONE"],
     ] #[filedir, station_name, mode_name] for static station // #[filedir, ref_file, mode_name] for dynamic station
-site = "FFMJ"
-file_info_list = [["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/IonAcc/{}-GEC3-FIXED-No-30-3600.flt".format(site), site, "NONE"],
-                  ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/IonAcc/{}-GEC3-FIXED-OnlyIon-30-3600.flt".format(site), site, "ION"],
-                  ["/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/TrpAcc/{}-GEC3-FIXED-OnlyTrp-30-3600.flt".format(site), site, "TRP"]]
-for i in range(0,201):
-    temp_file = [os.path.join("/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/IonAcc","{}-GEC3-FIXED-ION-{}-30-3600.flt".format(site,i)),site,"{:0>2}".format(i)]
-    file_info_list.append(temp_file)
-start_time = [2021,11,12,2,0,0]
-end_time = [2021,11,12,24,0,0]
+start_time = [2023,3,14,2,0,0]
+end_time = [2023,3,15,0,0,0]
 plot_type = ["E","N","U"]
-ylim = 0.5
-save_dir = "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/{}-ION-ConAccuracy".format(site)
-show = False
+ylim = 0.4
+save_dir = ""
+show = True
 fixed = False
 all = False
-mean = False
+mean = True
 time_type = "GPST"
 delta_xlabel = 1
 sigma = 3

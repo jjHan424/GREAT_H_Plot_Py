@@ -45,6 +45,9 @@ def load_data(CRD_file,site_list = []):
                 continue
             if len(site_list) > 0 and value[0] not in site_list:
                 continue
+            xyz = [float(value[1]),float(value[2]),float(value[3])]
+            if xyz[0] == 0.0:
+                continue
             crd_data[value[0]] = {}
             xyz = [float(value[1]),float(value[2]),float(value[3])]
             crd_data[value[0]]["XYZ"] = xyz
@@ -60,6 +63,31 @@ def load_data(CRD_file,site_list = []):
                 if i >= 4:
                     crd_data[value[0]]["SYS"] = crd_data[value[0]]["SYS"] + value[i]
             crd_data[value[0]]["VALUE"] = value[len(value)-1]
+            # if blh[0] < 54.8 or blh[0] > 58.8 or blh[1] < 9 or blh[1] > 16.5:
+            #     del crd_data[value[0]]
+    return crd_data
+
+def load_data_caster(CRD_file,site_list = []):
+    crd_data,B,L = {},[],[]
+    with open(CRD_file,'rt') as f:
+        for line in f:
+            value = line.split(";")
+            if len(site_list) > 0 and value[1] not in site_list:
+                continue
+            # if value[8] != "BEL":
+            #     continue
+            crd_data[value[1]] = {}
+            # xyz = [float(value[1]),float(value[2]),float(value[3])]
+            # crd_data[value[0]]["XYZ"] = xyz
+            blh = [float(value[9]),float(value[10]),0]
+            # blh = [blh[0] / glv.deg,blh[1] / glv.deg,blh[2]]
+            if blh[1] > 180:
+                blh = [blh[0],blh[1] - 360,blh[2]]
+            crd_data[value[1]]["BLH"] = blh
+            B.append(blh[0])
+            L.append(blh[1])
+            crd_data[value[1]]["SYS"] = line
+            crd_data[value[1]]["Location"] = value[8]
             # if blh[0] < 54.8 or blh[0] > 58.8 or blh[1] < 9 or blh[1] > 16.5:
             #     del crd_data[value[0]]
     return crd_data
@@ -118,13 +146,18 @@ def scatter_map_mark(map,crd_data = {},Site_group = {}):
                 break
     
     index_color = -1
+    marker_list = ['v','*']
+    legend_list = [0,0]
     for cur_group in Site_group.keys():
         index_color = index_color + 1
         for cur_site in Site_group[cur_group]:
             if cur_group == "Client":
-                map.scatter(crd_data[cur_site]["BLH"][1],crd_data[cur_site]["BLH"][0],marker='*',s=200,facecolor='#FF4C4C',edgecolor='k', linewidth=1)
+                map.scatter(crd_data[cur_site]["BLH"][1],crd_data[cur_site]["BLH"][0],marker='*',s=200,facecolor='#34BF49',edgecolor='k', linewidth=1)
             else:
-                map.scatter(crd_data[cur_site]["BLH"][1],crd_data[cur_site]["BLH"][0],marker='v',s=100,facecolor=color_list[index_color%3],edgecolor="k", linewidth=1)
+                legend_list[index_color] = map.scatter(crd_data[cur_site]["BLH"][1],crd_data[cur_site]["BLH"][0],marker=marker_list[index_color],s=100,facecolor=color_list[index_color%3],edgecolor="k", linewidth=1)
+    
+    # plt.legend((legend_list[0],legend_list[1]),["EPN","Centipede"],prop = font_text,framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=1, 
+    #         borderaxespad=0,bbox_to_anchor=(1,1.1),loc=1)
 
 def write_map_mark_name(map,crd_data):
     texts=[]
@@ -136,15 +169,18 @@ def Plot_basemap_site(CRD_file = "", SHP_file = [], Site_group = {}, Show = True
     #=== Load Data ===#
     site_list = []
     for cur_group in Site_group.keys():
-        if cur_group == "Client":
-            continue
+        # if cur_group == "Client":
+        #     continue
         for cur_site in Site_group[cur_group]:
             site_list.append(cur_site)
     crd_data = load_data(CRD_file,site_list)
+    # crd_data_1 = load_data_caster(CRD_file[1],site_list)
+    # crd_data.update(crd_data_1)
     #=== Statistics ===#
     corner_grid = define_grid(crd_data, Space_resolution)
     #=== Plot ===#
     fig = plt.figure(figsize=(corner_grid[5]+1,corner_grid[4]+1))
+    # fig = plt.figure(figsize=(12,15))
     # set range
     map = Basemap(llcrnrlon=corner_grid[0], llcrnrlat=corner_grid[1], urcrnrlon=corner_grid[2], urcrnrlat=corner_grid[3], resolution='c',projection='cyl')
     # set lables & ticks

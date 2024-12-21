@@ -49,12 +49,14 @@ ref_como = "BBYS"
 # print(site_select)
 
 ref_blh = crd_file[ref_como]["BLH"]
-max_b,min_b,max_l,min_l = ref_blh[0] + delta_lat, ref_blh[0] - delta_lat, ref_blh[1] + delta_lat, ref_blh[1] - delta_lat
+# max_b,min_b,max_l,min_l = ref_blh[0] + delta_lat, ref_blh[0] - delta_lat, ref_blh[1] + delta_lat, ref_blh[1] - delta_lat
+max_b,min_b,max_l,min_l = 43.5, 36, 9.3,3.3
 for cur_site in site_list:
-    # if crd_file[cur_site]["BLH"][0] >= min_b and crd_file[cur_site]["BLH"][0] <= max_b and crd_file[cur_site]["BLH"][1] >= min_l and crd_file[cur_site]["BLH"][1] <= max_l:
-    #     site_select.append(cur_site)
-    if crd_file[cur_site]["BLH"][0] >= 25 and crd_file[cur_site]["BLH"][0] <= 40:
+    if crd_file[cur_site]["BLH"][0] >= min_b and crd_file[cur_site]["BLH"][0] <= max_b and crd_file[cur_site]["BLH"][1] >= min_l and crd_file[cur_site]["BLH"][1] <= max_l:
         site_select.append(cur_site)
+    # if crd_file[cur_site]["BLH"][0] >= 25 and crd_file[cur_site]["BLH"][0] <= 40:
+    #     site_select.append(cur_site)
+print(site_select)
 lon_list = []
 for cur_site in site_select:
     lon_list.append(crd_file[cur_site]["BLH"][1])
@@ -73,4 +75,14 @@ for cur_lon in site_max_num.keys():
     if len(site_max_num[cur_lon]) > max_num:
         max_num_lon = cur_lon
         max_num = len(site_max_num[cur_lon])
-print(site_max_num[max_num_lon])
+# print(site_max_num[max_num_lon])
+site_list_pair = ['ONS1-ONSA',"SPT0-SPT7","BUDP-BUDD"]
+for cur_pair in site_list_pair:
+    site_1 = cur_pair.split('-')[0]
+    site_2 = cur_pair.split('-')[1]
+    xyz1 = np.array(crd_file[site_1]["XYZ"])
+    xyz2 = np.array(crd_file[site_2]["XYZ"])
+    h1 = np.array(crd_file[site_1]["BLH"][2])
+    h2 = np.array(crd_file[site_2]["BLH"][2])
+    print("{}-Dis: {:.2f}m".format(cur_pair,np.linalg.norm(xyz1-xyz2,2)))
+    print("{}-H:   {:.2f}m".format(cur_pair,abs(h1-h2)))

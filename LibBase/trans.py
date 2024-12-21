@@ -146,8 +146,8 @@ def ymd2mjd(Year,Mon,Day):
     return mjd
 
 def ymd2doy(year,month,day,hour,minute,second):
-    doy = floor(month*275/9)-floor((month+9)/12)*(floor((year-4*floor(year/4)+2)/3)+1)+day-30
-    return doy
+    doy = floor(month*275/9)-floor((month+9)/12)*(floor((year-4*floor(year/4)+2)/3)+1)+day + hour/24-30
+    return int(doy)
 
 def doy2ymd(year,doy):
     basetime = datetime.date(year,1,1)

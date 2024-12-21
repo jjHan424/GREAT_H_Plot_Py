@@ -14,25 +14,26 @@ import trans as tr
 import Lib_Plot_ZWD as PlotZWD
 
 #Setup Plot
-# file_info_list = [
-#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/EBRE-GE-FIXED-30.flt","/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/ebre3100.21zpd","EBRE"],
-#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/KOS1-GE-FIXED-30.flt","/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/kos13100.21zpd","KOS1"]
-#     ] #[Raw, Ref, Mode] #[file,mode]
 file_info_list = [
-    ["/Users/hanjunjie/Gap1/Data/2023/ZTD/BRUX0800.23zpd","BRUX"],
-    # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Plot_test/kos13100.21zpd","REF"]
+    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPP/2023080/client/KOS1-GEC3-FIXED-30.flt","/Users/hanjunjie/Gap1/Data/2023/ZTD/080/KOS10800.23zpd","PPPRTK"],
+    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPP/2023080/client/BRUX-GEC3-FIXED-30.flt","/Users/hanjunjie/Gap1/Data/2023/ZTD/080/BRUX0800.23zpd","PPP"]
     ] #[Raw, Ref, Mode] #[file,mode]
+# file_info_list = [
+#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2023080/client/BRUX-GEC3-FIXED-30-PPP-GRA-Bernese.flt","PPP"],
+#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2023080/client/BRUX-GEC3-FIXED-30-PPP-GRA.flt","PPPRTK"],
+#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2023080/BRUX0800.23zpd","REF"]
+#     ] #[Raw, Ref, Mode] #[file,mode]
 
 start_time = [2023,3,21,0,0,0]
-end_time = [2023,3,21,24,0,0]
-plot_type = "RAW" # DELTA RAW
-ylim = 20 # mm for Delta
+end_time = [2023,3,21,23,0,0]
+plot_type = "ZWD_DELTA" # ZWD_DELTA ZWD_RAW GRD_RAW GRD_DELTA
+ylim = 0 # mm for Delta
 save_dir = ""
 fixed = False
 show = True
 all = False
 time_type = "GPST"
-delta_xlabel = 1
+delta_xlabel = 2
 sigma = 3
 sigma_num = 0
 delay_model = 0

@@ -7,11 +7,13 @@ import trans as tr
 
 
 # ymd
-year,mon,day,hours,mins,secs = 2018,12,22,0,0,0
+year,mon,day,hours,mins,secs = 2024,10,29,0,0,0
 print("Day of Year: ",tr.ymd2doy(year,mon,day,hours,mins,secs))
 [week,sow]=tr.ymd2gpst(year,mon,day,hours,mins,secs)
 print("GPST(Week Sow): ",week)
+print("GPST(Second of Week): ",sow)
 print("GPST(Day of Week): ",sow/3600/24)
+print("MJD: ", format(tr.ymd2mjd(year,mon,day)))
 
 #MJD
 # mjd = 60298

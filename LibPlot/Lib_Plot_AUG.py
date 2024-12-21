@@ -4,10 +4,12 @@ import os
 from shutil import which
 from socket import SHUT_WR
 import sys
+from tkinter import Y
 from turtle import st
 
 from matplotlib import legend
 from matplotlib.widgets import EllipseSelector
+# from networkx import communicability_betweenness_centrality
 sys.path.insert(0,os.path.dirname(__file__)+'/../LibBase')
 from matplotlib.markers import MarkerStyle
 import numpy as np
@@ -193,7 +195,7 @@ def compare_aug(data_raw = {},data_model = {}):
                 all_data[time][sat][type] = data_model[time][sat][type]
     return all_data
 
-def plot_ION_G_E_C(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True):
+def plot_ION_G_E_C(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True, Plot_type = "ION"):
     #=== Plot ===#
     if Legend:
         figP,axP = plt.subplots(3,1,figsize=(15,10),sharey=True,sharex=True)
@@ -201,10 +203,14 @@ def plot_ION_G_E_C(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = T
         figP,axP = plt.subplots(3,1,figsize=(12,10),sharey=True,sharex=True)
     sys_plotindex = {"G":0,"E":1,"C":2}
     sat_list = {"G":[],"E":[],"C":[]}
+    if Plot_type == "ION":
+        cur_plot_type = "ION1"
+    elif Plot_type == "DION":
+        cur_plot_type = "dION1"
     for cur_sat in Plot_Data.keys():
-        if "ION1" not in Plot_Data[cur_sat].keys():
+        if cur_plot_type not in Plot_Data[cur_sat].keys():
             continue
-        axP[sys_plotindex[cur_sat[0]]].scatter(Plot_Data[cur_sat]["TIME"],Plot_Data[cur_sat]["ION1"],s=3)
+        axP[sys_plotindex[cur_sat[0]]].scatter(Plot_Data[cur_sat]["TIME"],Plot_Data[cur_sat][cur_plot_type],s=3)
         sat_list[cur_sat[0]].append(cur_sat)
     
     #===Set Label===#
@@ -213,7 +219,11 @@ def plot_ION_G_E_C(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = T
     labels = axP[0].get_yticklabels()
     for i in range(3):
         labels = labels + axP[i].get_yticklabels() + axP[i].get_xticklabels()
-        axP[i].set_ylim(-Ylim,Ylim)
+        if Ylim != 0:
+            if Plot_type == "DION":
+                axP[i].set_ylim(0,Ylim)
+            else:
+                axP[i].set_ylim(-Ylim,Ylim)
     [label.set_fontsize(xtick_size) for label in labels]
     [label.set_fontname('Arial') for label in labels]
     axP[2].set_xlabel('GPS time (hour)',font_label)
@@ -223,16 +233,18 @@ def plot_ION_G_E_C(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = T
     axP[2].set_title('BDS',font_title)
 
     #===Set text===#
-    sys_rms,sys_mean = {"G":[],"E":[],"C":[]},{"G":[],"E":[],"C":[]}
+    sys_rms,sys_mean = {},{}
     for cur_sat in Plot_Data.keys():
-        if "ION1" not in Plot_Data[cur_sat].keys():
+        if cur_plot_type not in Plot_Data[cur_sat].keys():
             continue
-        sys_rms[cur_sat[0]].append(np.sqrt(np.mean(np.array(Plot_Data[cur_sat]["ION1"])**2))*100)
-        sys_mean[cur_sat[0]].append(np.mean(Plot_Data[cur_sat]["ION1"]))
+        if cur_sat[0] not in sys_rms.keys():
+            sys_rms[cur_sat[0]],sys_mean[cur_sat[0]] = [],[]
+        sys_rms[cur_sat[0]].append(np.sqrt(np.mean(np.array(Plot_Data[cur_sat][cur_plot_type])**2))*100)
+        sys_mean[cur_sat[0]].append(np.mean(Plot_Data[cur_sat][cur_plot_type]))
     for cur_sys in sys_rms.keys():
-        MRS_str = "RMS = {:.2f} cm, MEAN = {:.2f} cm".format(np.mean(sys_rms[cur_sat[0]]),np.mean(sys_mean[cur_sat[0]]))    
+        MRS_str = "RMS = {:.2f} cm, MEAN = {:.2f} cm".format(np.mean(sys_rms[cur_sys]),np.mean(sys_mean[cur_sys]))    
         ax_range = axP[sys_plotindex[cur_sys]].axis()
-        axP[sys_plotindex[cur_sys]].text(ax_range[0],ax_range[3]+Ylim/15,MRS_str,font_text)
+        axP[sys_plotindex[cur_sys]].text(ax_range[0],ax_range[3]+Ylim/30,MRS_str,font_text)
         print("{}: {}".format(cur_sys,MRS_str))
 
     #===Set Legend===#
@@ -254,25 +266,84 @@ def plot_ION_G_E_C(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = T
                     borderaxespad=0,bbox_to_anchor=(1.42,1.15),loc=1) 
     plt.show()
 
-def plot_ZWD(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True):
+def plot_ION_GEC(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True, Plot_type = "ION"):
     #=== Plot ===#
-    figP,axP = plt.subplots(1,1,figsize=(12,4),sharey=True,sharex=True)
-    sys_plotindex = {"G":0,"E":1,"C":2}
+    if Legend:
+        figP,axP = plt.subplots(1,1,figsize=(15,6),sharey=True,sharex=True)
+    else:
+        figP,axP = plt.subplots(1,1,figsize=(12,6),sharey=True,sharex=True)
+    # sys_plotindex = {"G":0,"E":1,"C":2}
     sat_list = {"G":[],"E":[],"C":[]}
-    axP.scatter(Plot_Data["G"]["TIME"],Plot_Data["G"]["TRP1"],s=3)
+    if Plot_type[0:3] == "ION":
+        cur_plot_type = "ION1"
+    elif Plot_type[0:4] == "DION":
+        cur_plot_type = "dION1"
+    for cur_sat in Plot_Data.keys():
+        if cur_plot_type not in Plot_Data[cur_sat].keys():
+            continue
+        axP.scatter(Plot_Data[cur_sat]["TIME"],Plot_Data[cur_sat][cur_plot_type],s=3)
+        sat_list[cur_sat[0]].append(cur_sat)
     
     #===Set Label===#
     axP.set_xticklabels(XlabelSet[0])
     axP.set_xticks(XlabelSet[1])
     labels = axP.get_yticklabels() + axP.get_xticklabels()
-    axP.set_ylim(-Ylim,Ylim)
+    if Ylim != 0:
+        if Plot_type[0:3] == "ION":
+            axP.set_ylim(-Ylim,Ylim)
+        else:
+            axP.set_ylim(0,Ylim)
+    [label.set_fontsize(xtick_size) for label in labels]
+    [label.set_fontname('Arial') for label in labels]
+    axP.set_xlabel('GPS time (hour)',font_label)
+    axP.set_ylabel('Difference of Ionosphere Delay correction (m)',font_label)
+
+    #===Set text===#
+    sys_rms,sys_mean = {},{}
+    for cur_sat in Plot_Data.keys():
+        if cur_plot_type not in Plot_Data[cur_sat].keys():
+            continue
+        if cur_sat[0] not in sys_rms.keys():
+            sys_rms[cur_sat[0]],sys_mean[cur_sat[0]] = [],[]
+        sys_rms[cur_sat[0]].append(np.sqrt(np.mean(np.array(Plot_Data[cur_sat][cur_plot_type])**2))*100)
+        sys_mean[cur_sat[0]].append(np.mean(Plot_Data[cur_sat][cur_plot_type]))
+    for cur_sys in sys_rms.keys():
+        MRS_str = "RMS = {:.2f} cm, MEAN = {:.2f} cm".format(np.mean(sys_rms[cur_sys]),np.mean(sys_mean[cur_sys])) 
+        print("{}: {}".format(cur_sys,MRS_str))   
+    # ax_range = axP.axis()
+    # axP.text(ax_range[0],ax_range[3]+Ylim/30,MRS_str,font_text)
+    
+
+    #===Set Legend===#
+    plt.show()
+
+def plot_ZWD(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True, Plot_type = "ZWD"):
+    #=== Plot ===#
+    figP,axP = plt.subplots(1,1,figsize=(12,4),sharey=True,sharex=True)
+    sys_plotindex = {"G":0,"E":1,"C":2}
+    sat_list = {"G":[],"E":[],"C":[]}
+    if Plot_type == "ZWD":
+        cur_plot_type = "TRP1"
+    elif Plot_type == "DTRP":
+        cur_plot_type = "dTRP"
+    axP.scatter(Plot_Data["G"]["TIME"],Plot_Data["G"][cur_plot_type],s=3)
+    
+    #===Set Label===#
+    axP.set_xticklabels(XlabelSet[0])
+    axP.set_xticks(XlabelSet[1])
+    labels = axP.get_yticklabels() + axP.get_xticklabels()
+    if Ylim != 0:
+        if Plot_type == "DTRP":
+            axP.set_ylim(0,Ylim)
+        else:
+            axP.set_ylim(-Ylim,Ylim)
     [label.set_fontsize(xtick_size) for label in labels]
     [label.set_fontname('Arial') for label in labels]
     axP.set_xlabel('GPS time (hour)',font_label)
     axP.set_ylabel('Difference of ZWD correction (m)',font_label)
 
     #===Set text===#
-    MRS_str = "RMS = {:.2f} cm, MEAN = {:.2f} cm".format(np.sqrt(np.mean(np.array(Plot_Data["G"]["TRP1"])**2))*100,np.mean(Plot_Data["G"]["TRP1"]))    
+    MRS_str = "RMS = {:.2f} cm, MEAN = {:.2f} cm".format(np.sqrt(np.mean(np.array(Plot_Data["G"][cur_plot_type])**2))*100,np.mean(Plot_Data["G"][cur_plot_type]))    
     ax_range = axP.axis()
     axP.text(ax_range[0],ax_range[3]+Ylim/15,MRS_str,font_text)
     print("{}".format(MRS_str))
@@ -287,16 +358,28 @@ def plot_NSAT_GEC(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = Tr
     #=== Static Sat Number===#
     PLOT_ALL = {"G":{"TIME":[],"NSAT":[]},"E":{"TIME":[],"NSAT":[]},"C":{"TIME":[],"NSAT":[]}}
     legend_list = {"G":"GPS","E":"GAL","C":"BDS"}
-    for cur_time in Plot_Data.keys():
-        plot_time = (cur_time - Conversion_time) / 3600
-        Nsat_temp = {"G":0,"E":0,"C":0}
+    delta_data_time = 30
+    [start_week,start_sow] = tr.ymd2gpst(Start[0],Start[1],Start[2],Start[3],Start[4],Start[5])
+    end_sow = start_sow + Duration_time*3600
+    cur_sow = start_sow
+    while cur_sow <= end_sow:
+        plot_time = (cur_sow - Conversion_time) / 3600
         if ((plot_time >= Start[3] and plot_time <= (Start[3]+Duration_time)) or All):
-            for cur_sat in Plot_Data[cur_time].keys():
-                # if len(cur_sat) > 1:
-                Nsat_temp[cur_sat[0]] = Nsat_temp[cur_sat[0]] + 1
-            for cur_sys in Nsat_temp.keys():
-                PLOT_ALL[cur_sys]["TIME"].append(plot_time)
-                PLOT_ALL[cur_sys]["NSAT"].append(Nsat_temp[cur_sys])
+            if cur_sow in Plot_Data.keys():
+                Nsat_temp = {"G":0,"E":0,"C":0}
+                for cur_sat in Plot_Data[cur_sow].keys():
+                    # if len(cur_sat) > 1:
+                    Nsat_temp[cur_sat[0]] = Nsat_temp[cur_sat[0]] + 1
+                for cur_sys in Nsat_temp.keys():
+                    PLOT_ALL[cur_sys]["TIME"].append(plot_time)
+                    PLOT_ALL[cur_sys]["NSAT"].append(Nsat_temp[cur_sys])
+            else:
+                Nsat_temp = {"G":0,"E":0,"C":0}
+                for cur_sys in Nsat_temp.keys():
+                    PLOT_ALL[cur_sys]["TIME"].append(plot_time)
+                    PLOT_ALL[cur_sys]["NSAT"].append(Nsat_temp[cur_sys])
+        cur_sow = cur_sow + delta_data_time
+    #=== Find Time Slip ===#
 
     #=== Plot ===#
     figP,axP = plt.subplots(1,1,figsize=(12,4),sharey=True,sharex=True)
@@ -305,8 +388,8 @@ def plot_NSAT_GEC(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = Tr
     j=0
     sys_list = []
     for cur_sys in PLOT_ALL.keys():
-        index_no0 = np.array(PLOT_ALL[cur_sys]["NSAT"]) != 0
-        axP.plot(np.array(PLOT_ALL[cur_sys]["TIME"])[index_no0],np.array(PLOT_ALL[cur_sys]["NSAT"])[index_no0],color = color_list[j%3],linewidth = 2)
+        # index_no0 = np.array(PLOT_ALL[cur_sys]["NSAT"]) != 0
+        axP.plot(np.array(PLOT_ALL[cur_sys]["TIME"]),np.array(PLOT_ALL[cur_sys]["NSAT"]),color = color_list[j%3],linewidth = 2)
         sys_list.append(legend_list[cur_sys])
         j = j + 1
     
@@ -335,6 +418,20 @@ def plot_NSAT_GEC(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = Tr
     axP.set_position([box.x0, box.y0 + box.height*0.1, box.width, box.height*0.8])
     plt.show()   
 
+def expand_trp(data_raw):
+    all_data = {}
+    for cur_time in data_raw.keys():
+        if cur_time not in all_data.keys():
+            all_data[cur_time] = {}
+        for cur_sat in data_raw[cur_time].keys():
+            if cur_sat not in all_data[cur_time].keys():
+                all_data[cur_time][cur_sat] = {}
+            if cur_sat[0] not in all_data[cur_time].keys():
+                all_data[cur_time][cur_sat[0]] = {}
+            for cur_mode in data_raw[cur_time][cur_sat].keys():
+                all_data[cur_time][cur_sat][cur_mode] = data_raw[cur_time][cur_sat][cur_mode]
+                all_data[cur_time][cur_sat[0]]["dTRP"] = data_raw[cur_time][cur_sat]["dTRP"]
+    return all_data
 
 def Plot_timeseries_aug_compare(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5,Save_dir="",Show=True,All=False,Time_type = "GPST",Delta_xlabel = 1,Delay_model = 0,Legend = False,Sigma=3,Signum=0):
     [start_week,start_sow] = tr.ymd2gpst(Start[0],Start[1],Start[2],Start[3],Start[4],Start[5])
@@ -342,13 +439,18 @@ def Plot_timeseries_aug_compare(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0
     duration_time = ((end_week-start_week)*604800+(end_sow - start_sow))/3600
     #=== Load data ===#
     [head_raw,data_raw] = load_data(File_info[0],Delay_model)
-    [head_model,data_model] = load_data(File_info[1],Delay_model)
+    if (Plot_type != "DTRP" and Plot_type != "DION") and len(File_info) >= 2:
+        [head_model,data_model] = load_data(File_info[1],Delay_model)
 
     #=== Compare AUG ===#
-    data_compare = compare_aug(data_raw,data_model)
+    if Plot_type != "DTRP" and Plot_type != "DION" and len(File_info) >= 2:
+        data_compare = compare_aug(data_raw,data_model)
+    else:
+        data_compare = expand_trp(data_raw)
 
     #=== Data Convert ===#
-    [XLabel,XTick,cov_time,begT,LastT]=glv.xtick(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
+    # [XLabel,XTick,cov_time,begT,LastT]=glv.xtick(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
+    [XLabel,XTick,cov_time,begT,LastT]=glv.xtick_min(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
     PLOT_ALL, PLOT_RAW = {},{}
     for cur_time in data_compare.keys():
         plot_time = (cur_time - cov_time) / 3600
@@ -366,10 +468,13 @@ def Plot_timeseries_aug_compare(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0
                     PLOT_RAW[cur_sat][cur_type].append(data_compare[cur_time][cur_sat][cur_type])
 
     #=== Plot ===#
-    if Plot_type == "ION":
-        plot_ION_G_E_C(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Legend = Legend)
-    if Plot_type == "ZWD":
-        plot_ZWD(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show)
+    if "ION" in Plot_type:
+        if "GEC" in Plot_type:
+            plot_ION_GEC(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Legend = Legend, Plot_type = Plot_type)
+        else:
+            plot_ION_G_E_C(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Legend = Legend, Plot_type = Plot_type)
+    if Plot_type == "ZWD" or Plot_type == "DTRP":
+        plot_ZWD(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Plot_type = Plot_type)
     if Plot_type == "NSAT_RAW":
         plot_NSAT_GEC(Plot_Data=data_raw, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Conversion_time=cov_time, All = All, Start = Start, Duration_time = duration_time)
     if Plot_type == "NSAT_MODEL":
