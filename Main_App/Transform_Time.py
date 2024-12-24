@@ -7,7 +7,7 @@ import trans as tr
 
 
 # ymd
-year,mon,day,hours,mins,secs = 2024,10,29,0,0,0
+year,mon,day,hours,mins,secs = 2023,9,1,0,0,0
 print("Day of Year: ",tr.ymd2doy(year,mon,day,hours,mins,secs))
 [week,sow]=tr.ymd2gpst(year,mon,day,hours,mins,secs)
 print("GPST(Week Sow): ",week)

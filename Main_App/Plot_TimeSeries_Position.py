@@ -18,8 +18,8 @@ import Lib_Plot_Position as PlotPOS
 file_info_list = [
     # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2021162/client/GAMG-GEC3-FLOAT-30-WUM-ULTRALSP3.flt", "GAMG", "WUM1"],
     # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2021162/client/GAMG-GEC3-FLOAT-30-WUM-KIN.flt", "GAMG", "WUM-GEC"],
-    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD_KINEMATIC/PPPRTK/2023073/client/TIT2-GEC3-FIXED-30-3600.flt", "TIT2", "PPP"],
-    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPPRTK/2023073/client/TIT2-GEC3-FIXED-30-3600.flt", "TIT2", "PPPRTK"],
+    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPP/2023073/client/REDU-GEC3-FLOAT-30-3600.flt", "REDU", "FLOAT"],
+    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPP/2023073/client/REDU-GEC3-FIXED-30-3600.flt", "REDU", "FIXED"],
     # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPP/2023073/client/KOS1-GEC3-FIXED-30-3600.flt", "BRUX", "GFZ"],
     # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2024282/client/GAMG-GEC3-FLOAT-30.flt", "GAMG", "GFZ-GEC"],
     # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2021162/client/GAMG-GEC3-FLOAT-30-GFZ-KIN.flt", "GAMG", "GFZ-GEC"],
@@ -34,7 +34,7 @@ save_dir = ""
 show = True
 fixed = False
 all = False
-mean = True
+mean = False
 time_type = "GPST"
 delta_xlabel = 1
 sigma = 3

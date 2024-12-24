@@ -173,9 +173,9 @@ def Plot_basemap_site(CRD_file = "", SHP_file = [], Site_group = {}, Show = True
         #     continue
         for cur_site in Site_group[cur_group]:
             site_list.append(cur_site)
-    crd_data = load_data(CRD_file,site_list)
-    # crd_data_1 = load_data_caster(CRD_file[1],site_list)
-    # crd_data.update(crd_data_1)
+    crd_data = load_data(CRD_file[0],site_list)
+    crd_data_1 = load_data_caster(CRD_file[1],site_list)
+    crd_data.update(crd_data_1)
     #=== Statistics ===#
     corner_grid = define_grid(crd_data, Space_resolution)
     #=== Plot ===#

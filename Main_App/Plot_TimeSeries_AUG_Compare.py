@@ -15,20 +15,19 @@ import Lib_Plot_AUG as PlotAUG
 
 #Setup Plot
 file_info_list = [
-    # "/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/Grid_Diff_B2b/FLT_B2b_Single/2023340/CMNCYN-R-C-CROSS/YNJD-GEC3-30.diff",
-    "/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/Grid_Diff_B2b/FLT_B2b_Single/2023340/EPN1-R-C-CROSS/EUSK-GEC3-30.diff",
-    # "/Users/hanjunjie/Gap1/IONO_Accuracy_Predict/Res_FromServer/CLIENT/BRUX-GEC3-FIXED-30-10.aug"
+    "/Users/hanjunjie/Gap1/Data/2023/AUG/341/TERS-GEC3-FIXED-30-B2b.aug",
+    "/Users/hanjunjie/Gap1/Data/2023/AUG/080/FFMJ-GEC3-FIXED-30.aug",
     ] #[Raw, Model]
 
-start_time = [2023,12,6,0,0,0]
-end_time = [2023,12,7,0,0,0]
-plot_type = "DION" # ION, ZWD, NSAT_RAW, NSAT_MODEL, NSAT_COM DION DTRP _GEC
-ylim = 0
+start_time = [2023,12,7,2,0,0]
+end_time = [2023,12,7,24,0,0]
+plot_type = "NSAT_RAW" # ION, ZWD, NSAT_RAW, NSAT_MODEL, NSAT_COM DION DTRP _GEC
+ylim = 0.5
 save_dir = ""
 show = True
 all = False
 time_type = "GPST"
-delta_xlabel = 1/4
+delta_xlabel = 2
 sigma = 3
 sigma_num = 0
 delay_model = 0

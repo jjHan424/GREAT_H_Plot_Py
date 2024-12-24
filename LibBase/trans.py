@@ -194,3 +194,27 @@ def wgs84togcj02(lng, lat):
     mglat = lat + dlat
     mglng = lng + dlng
     return [mglng, mglat]
+
+def ele_of_sun(lat,lon,year,mon,day,hour,lastT,step):
+    doy = ymd2doy(year,mon,day,0,0,0)
+    N0 = 79.6764+0.2422*(year-1985) - int((year-1985)/4)
+    t = doy-N0
+    theta = 2*pi*t/365.2422
+    ED = 0.3723+23.2567*sin(theta)+0.1149*sin(2*theta) - 0.1712*sin(3*theta) - 0.758*cos(theta) + 0.3656*cos(2*theta) + 0.0201*cos(3*theta)
+    cur_hour = hour
+    hour_int = hour
+    second,minute = 0,0
+    [w,soweek] = ymd2gpst(year,mon,day,hour_int,minute,second)
+    all_data = {}
+    while cur_hour < hour + lastT:
+        sin_h = sin(lat*glv.deg) * sin(ED*glv.deg) + cos(lat*glv.deg) * cos(ED*glv.deg) * cos((-180+15*(cur_hour+lon/15))*glv.deg)
+        H_sun = asin(sin_h)
+        if H_sun < 0:
+            # cur_hour = cur_hour + step/3600
+            H_sun = 0
+            # continue
+        
+        all_data[soweek] = H_sun/glv.deg
+        cur_hour = cur_hour + step/3600
+        soweek = soweek + step
+    return all_data

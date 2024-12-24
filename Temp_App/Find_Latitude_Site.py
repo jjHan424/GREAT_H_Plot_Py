@@ -86,3 +86,7 @@ for cur_pair in site_list_pair:
     h2 = np.array(crd_file[site_2]["BLH"][2])
     print("{}-Dis: {:.2f}m".format(cur_pair,np.linalg.norm(xyz1-xyz2,2)))
     print("{}-H:   {:.2f}m".format(cur_pair,abs(h1-h2)))
+
+BLH = crd_file["REDU"]["BLH"]
+ele_sun = tr.ele_of_sun(BLH[0],BLH[1],2023,3,21,0,24,3600)
+print(1)

@@ -262,7 +262,7 @@ def plot_MultiDay_ZWD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, L
         axP.set_ylim(-Ylim,Ylim)
     [label.set_fontsize(xtick_size) for label in labels]
     [label.set_fontname('Arial') for label in labels]
-    # axP.set_xlabel('GPS time (hour)',font_label)
+    axP.set_xlabel('GPS time (hour)',font_label)
     axP.set_xlabel('Time (YYYY-MM-DD)',font_label)
     axP.set_ylabel('ZWD errors (mm)',font_label)
     # Date
@@ -271,7 +271,7 @@ def plot_MultiDay_ZWD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, L
         doy = tr.ymd2doy(Start[0],Start[1],Start[2],Start[3] + cur_hour,Start[4],Start[5])
         [year,mon,day] = tr.doy2ymd(Start[0],doy)
         XlabelDate.append("{}-{:0>2}-{:0>2}".format(year,mon,day))
-    axP.set_xticklabels(XlabelDate)
+    # axP.set_xticklabels(XlabelDate)
     #===Set text===#
     MRS_str = "RMS:"
     RMS_value = []
@@ -288,9 +288,10 @@ def plot_MultiDay_ZWD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, L
         while i < len(index_all):
             index_rms = index_rms | index_all[i]
             i = i + 1
+        # index_rms = time_np > 0
         MRS_str = MRS_str + " {:.1f}mm,".format(np.sqrt(np.mean(np.array(Plot_Data[cur_mode]["ZWD"])[index_rms]**2)))
         RMS_value.append(np.sqrt(np.mean(np.array(Plot_Data[cur_mode]["ZWD"])[index_rms]**2)))
-    MRS_str = MRS_str + " {:.2f}%,".format((RMS_value[0] - RMS_value[1])/RMS_value[0]*100)
+    # MRS_str = MRS_str + " {:.2f}%,".format((RMS_value[0] - RMS_value[1])/RMS_value[0]*100)
     ax_range = axP.axis()
     axP.text(ax_range[0],ax_range[3]+Ylim/25,MRS_str[:-1],font_text)
     print("{}".format(MRS_str))
@@ -370,15 +371,15 @@ def plot_MultiDay_ZWD_raw(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Leg
     labels = axP.get_yticklabels() + axP.get_xticklabels()
     [label.set_fontsize(xtick_size) for label in labels]
     [label.set_fontname('Arial') for label in labels]
-    # axP.set_xlabel('GPS time (hour)',font_label)
-    axP.set_xlabel('Time (YYYY-MM-DD)',font_label)
+    axP.set_xlabel('GPS time (hour)',font_label)
+    # axP.set_xlabel('Time (YYYY-MM-DD)',font_label)
     axP.set_ylabel('ZWD (mm)',font_label)
     XlabelDate = []
     for cur_hour in XlabelSet[1]:
         doy = tr.ymd2doy(Start[0],Start[1],Start[2],Start[3] + cur_hour,Start[4],Start[5])
         [year,mon,day] = tr.doy2ymd(Start[0],doy)
         XlabelDate.append("{}-{:0>2}-{:0>2}".format(year,mon,day))
-    axP.set_xticklabels(XlabelDate)
+    # axP.set_xticklabels(XlabelDate)
     #===Set text===#
     # MRS_str = "RMS:"
     # for cur_mode in Plot_Data.keys():
@@ -619,7 +620,7 @@ def plot_MultiDay_GRD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, L
         plt.savefig(os.path.join(Save_dir,"GRD-DELTA{}.jpg".format(file_name)),dpi=600)
         
 
-def statistics(All_Data, Delta_data, Start_time, Duration_time, Reconvergence, Recon_list, Show = True, Save_dir = ""):
+def statistics(All_Data, Delta_data, Start_time, Duration_time, Reconvergence, Recon_list = [50,100], Show = True, Save_dir = ""):
     #=== Reconvergence ===#
     # Set
     max_recon_time = 1800
@@ -693,13 +694,21 @@ def statistics(All_Data, Delta_data, Start_time, Duration_time, Reconvergence, R
         print("{:<15}".format("Mode") + "{:>7}".format("ZWD(s)") + \
                                          "{:>14}".format("TGN(s)") + \
                                          "{:>14}".format("TGE(s)"))
+        mode_list = []
         for cur_mode in con_ZWD.keys():
+            mode_list.append(cur_mode)
             Str_temp = "{:<15}".format(cur_mode) + "{:>7}".format(int(np.mean(con_ZWD[cur_mode][cur_accuracy]))) + \
                                                 "{:>14}".format(int(np.mean(con_TGN[cur_mode][cur_accuracy]))) + \
                                                 "{:>14}".format(int(np.mean(con_TGE[cur_mode][cur_accuracy])))
             print(Str_temp)
-            # print(con_ZWD[cur_mode][cur_accuracy])
-        # for cur_mode in Static_print.keys():
+        
+        # print((int(np.mean(con_ZWD[mode_list[0]][cur_accuracy]))-int(np.mean(con_ZWD[mode_list[1]][cur_accuracy])))/int(np.mean(con_ZWD[mode_list[0]][cur_accuracy]))*100)
+            # print("{:<20}-{:0>3}:{}".format(cur_mode,cur_accuracy,con_ZWD[cur_mode][cur_accuracy]))
+            # file = open("/Users/hanjunjie/Gap1/汇报/Image/20241224_Centipede_ZWD/ReconvergenceTimeList.txt",'a')
+            # file.write("{:<20}-{:0>3}:{}".format(cur_mode,cur_accuracy,con_ZWD[cur_mode][cur_accuracy]) + "\n")
+            # file.close()
+        
+
 
 
 def Plot_timeseries_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5,Save_dir="",Fixed = False,Show=True,All=False,Time_type = "GPST",Delta_xlabel = 1,Delay_model = 0,Legend = False,Sigma=3,Signum=0):
@@ -759,7 +768,7 @@ def Plot_timeseries_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5,Save_
     elif Plot_type == "GRD_DELTA":
         plot_GRD_delta(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show)
 
-def plot_percent_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 3600, Percent = 0.9, Delta_data = 30 , Save_dir = ""):
+def plot_percent_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 3600, Percent = 0.9, Delta_data = 30 , Cov_time = 0, Save_dir = ""):
     data_sort = {}
     
     #=== Initialization ===#
@@ -775,6 +784,14 @@ def plot_percent_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 
     #=== Sort Data ===#
     for cur_mode in all_data.keys():
         for cur_time in all_data[cur_mode].keys():
+            plot_time = (cur_time - Cov_time) / 3600
+            # if (cur_time - start_sow) % 300 != 0:
+            #     continue
+            cur_hour_in_day = plot_time
+            while cur_hour_in_day > 24:
+                cur_hour_in_day = cur_hour_in_day - 24
+            # if cur_hour_in_day >= 5 and cur_hour_in_day <= 19:
+            #     continue
             if cur_time%3600 == 0:
                 cur_time_find = 0
                 while cur_time_find < Reconvergence:
@@ -840,7 +857,7 @@ def plot_percent_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 
             file_name = file_name + "-{}".format(cur_mode)
         plt.savefig(os.path.join(Save_dir,"ZWD-PERCENT{}.jpg".format(file_name)),dpi=600)
 
-def plot_box_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 3600, Percent = 0.9, Delta_data = 30 , Save_dir = ""):
+def plot_box_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 3600, Percent = 0.9, Delta_data = 30 ,Cov_time = 0, Save_dir = ""):
     data_sort = {}
     mode_list = {}
     #=== Initialization ===#
@@ -856,6 +873,14 @@ def plot_box_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 3600
     #=== Sort Data ===#
     for cur_mode in all_data.keys():
         for cur_time in all_data[cur_mode].keys():
+            plot_time = (cur_time - Cov_time) / 3600
+            # if (cur_time - start_sow) % 300 != 0:
+            #     continue
+            cur_hour_in_day = plot_time
+            while cur_hour_in_day > 24:
+                cur_hour_in_day = cur_hour_in_day - 24
+            # if cur_hour_in_day < 5 or cur_hour_in_day > 19:
+            #     continue
             if cur_time%3600 == 0:
                 cur_time_find = 0
                 while cur_time_find < Reconvergence:
@@ -943,24 +968,24 @@ def plot_box_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 3600
                 framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=3, 
                 borderaxespad=0,bbox_to_anchor=(1,1.08),loc=1)
     #=== Zoom ===#
-    # axins1 = axP.inset_axes(((1/4,1/3,0.7,0.4)))
-    # index = 0
-    # box = axins1.boxplot(multi_plot[10:],positions = x_labels[10:],showfliers = False,patch_artist = True, widths = 0.5)
-    # index = 0
-    # for boxes,medians in zip(box['boxes'],box['medians']):
-    #     if index%2==0:
-    #         color_idnex = 0
-    #     else:
-    #         color_idnex = 1
-    #     boxes.set_facecolor(color_list[color_idnex])
-    #     medians.set_color("k")
-    #     index = index + 1
-    # axins1.set_xticks(x_tick_list[5:])
-    # axins1.set_xticklabels(x_tick_label[5:])
-    # mark_inset(axP,axins1,loc1=3,loc2=1,fc = "none",ec="k",lw=1,ls = '--')
-    # labels = axins1.get_yticklabels() + axins1.get_xticklabels()
-    # [label.set_fontsize(xtick_size) for label in labels]
-    # [label.set_fontname('Arial') for label in labels]
+    axins1 = axP.inset_axes(((1/4,1/3,0.7,0.4)))
+    index = 0
+    box = axins1.boxplot(multi_plot[10:],positions = x_labels[10:],showfliers = False,patch_artist = True, widths = 0.5)
+    index = 0
+    for boxes,medians in zip(box['boxes'],box['medians']):
+        if index%2==0:
+            color_idnex = 0
+        else:
+            color_idnex = 1
+        boxes.set_facecolor(color_list[color_idnex])
+        medians.set_color("k")
+        index = index + 1
+    axins1.set_xticks(x_tick_list[5:])
+    axins1.set_xticklabels(x_tick_label[5:])
+    mark_inset(axP,axins1,loc1=3,loc2=1,fc = "none",ec="k",lw=1,ls = '--')
+    labels = axins1.get_yticklabels() + axins1.get_xticklabels()
+    [label.set_fontsize(xtick_size) for label in labels]
+    [label.set_fontname('Arial') for label in labels]
     if Show:
         plt.show()
     else:
@@ -987,7 +1012,7 @@ def plot_qq_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 3600,
         #     file_name = file_name + "-{}".format(cur_mode)
         # plt.savefig(os.path.join(Save_dir,"ZWD-BOX-ZOOM{}.jpg".format(file_name)),dpi=600)
 
-def Plot_MultiDay_timeseries_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5,Save_dir="",Fixed = False,Show=True,All=False,Time_type = "GPST",Delta_xlabel = 1,Delay_model = 0,Legend = False,Sigma=3,Signum=0,Start_hour = 0,End_hour = 0,Inter_zpd = False, Reconvergence = 3600, Recon_list = [], Percent = 0.9):
+def Plot_MultiDay_timeseries_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5,Save_dir="",Fixed = False,Show=True,All=False,Time_type = "GPST",Delta_xlabel = 1,Delay_model = 0,Legend = False,Sigma=3,Signum=0,Start_hour = 0,End_hour = 0,Inter_zpd = False, Reconvergence = 3600, Recon_list = [50,100], Percent = 0.9):
     all_data,data_raw,data_ref = {},{},{}
     [start_week,start_sow] = tr.ymd2gpst(Start[0],Start[1],Start[2],Start[3],Start[4],Start[5])
     [end_week,end_sow] = tr.ymd2gpst(End[0],End[1],End[2],End[3],End[4],End[5])
@@ -1021,6 +1046,11 @@ def Plot_MultiDay_timeseries_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=
         for cur_time in all_data[cur_mode].keys():
             plot_time = (cur_time - cov_time) / 3600
             # if (cur_time - start_sow) % 300 != 0:
+            #     continue
+            cur_hour_in_day = plot_time
+            while cur_hour_in_day >24:
+                cur_hour_in_day = cur_hour_in_day - 24
+            # if cur_hour_in_day >= Start_hour and cur_hour_in_day <= End_hour:
             #     continue
             if ((plot_time >= Start[3] and plot_time <= (Start[3]+duration_time)) or All):
                 if Fixed and all_data[cur_mode][cur_time]["AMB"] != 1:
@@ -1074,6 +1104,11 @@ def Plot_MultiDay_percent_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5
             plot_time = (cur_time - cov_time) / 3600
             # if (cur_time - start_sow) % 300 != 0:
             #     continue
+            cur_hour_in_day = plot_time
+            while cur_hour_in_day > 24:
+                cur_hour_in_day = cur_hour_in_day - 24
+            if cur_hour_in_day >= Start_hour and cur_hour_in_day <= End_hour:
+                continue
             if ((plot_time >= Start[3] and plot_time <= (Start[3]+duration_time)) or All):
                 if Fixed and all_data[cur_mode][cur_time]["AMB"] != 1:
                     continue
@@ -1091,9 +1126,9 @@ def Plot_MultiDay_percent_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5
         statistics(PLOT_ALL, 30, Start, duration_time, Reconvergence, Recon_list, Show, Save_dir)
     #=== plot ===#
     if Plot_type == "ZWD_DELTA_PERCENT":
-        plot_percent_ZWD_delta(all_data = all_data,Ylim = Ylim, Show=Show, Reconvergence = Reconvergence, Percent = Percent, Save_dir = Save_dir)
+        plot_percent_ZWD_delta(all_data = all_data,Ylim = Ylim, Show=Show, Reconvergence = Reconvergence, Percent = Percent, Cov_time=cov_time, Save_dir = Save_dir)
     elif Plot_type == "ZWD_DELTA_BOX":
-        plot_box_ZWD_delta(all_data = all_data,Ylim = Ylim, Show=Show, Reconvergence = Reconvergence, Percent = Percent, Save_dir = Save_dir)
+        plot_box_ZWD_delta(all_data = all_data,Ylim = Ylim, Show=Show, Reconvergence = Reconvergence, Percent = Percent,Cov_time=cov_time, Save_dir = Save_dir)
     elif Plot_type == "ZWD_DELTA_QQ":
         plot_qq_ZWD_delta(all_data = all_data,Ylim = Ylim, Show=Show, Reconvergence = Reconvergence, Percent = Percent, Save_dir = Save_dir)
 
