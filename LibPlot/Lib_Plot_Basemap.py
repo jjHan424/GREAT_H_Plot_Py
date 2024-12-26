@@ -36,7 +36,7 @@ color_list = ["#0099E5","#34BF49","#FF4C4C"]
 #               "#b7295a","#6e2585","#f2af00","#5482ab","#ce1126",
 #               "#444444","#eeeeee"]
 
-def load_data(CRD_file,site_list = []):
+def load_data(CRD_file,site_list = [],Sys_list = {}):
     crd_data,B,L = {},[],[]
     with open(CRD_file,'rt') as f:
         for line in f:
@@ -46,9 +46,10 @@ def load_data(CRD_file,site_list = []):
             if len(site_list) > 0 and value[0] not in site_list:
                 continue
             xyz = [float(value[1]),float(value[2]),float(value[3])]
-            if xyz[0] == 0.0:
-                continue
+            # if xyz[0] == 0.0:
+            #     continue
             crd_data[value[0]] = {}
+            crd_data[value[0]]["VALUE"] = value[len(value)-1]
             xyz = [float(value[1]),float(value[2]),float(value[3])]
             crd_data[value[0]]["XYZ"] = xyz
             blh = tr.xyz2blh(xyz[0],xyz[1],xyz[2])
@@ -59,10 +60,17 @@ def load_data(CRD_file,site_list = []):
             B.append(blh[0])
             L.append(blh[1])
             crd_data[value[0]]["SYS"] = ""
-            for i in range(len(value)-1):
-                if i >= 4:
-                    crd_data[value[0]]["SYS"] = crd_data[value[0]]["SYS"] + value[i]
-            crd_data[value[0]]["VALUE"] = value[len(value)-1]
+            if len(Sys_list) > 0:
+                for i in range(len(value)-1):
+                    if i >= 4:
+                        crd_data[value[0]]["SYS"] = crd_data[value[0]]["SYS"] + value[i]
+                        value_list = value[i].split(",")
+                        if value_list[0][0] in Sys_list:
+                            for cur_band in Sys_list[value_list[0][0]]:
+                                if cur_band not in value_list and cur_band != value_list[0][-2:]:
+                                    crd_data[value[0]]["VALUE"] = "False"
+                        else:
+                            crd_data[value[0]]["VALUE"] = "False"
             # if blh[0] < 54.8 or blh[0] > 58.8 or blh[1] < 9 or blh[1] > 16.5:
             #     del crd_data[value[0]]
     return crd_data
@@ -95,6 +103,8 @@ def load_data_caster(CRD_file,site_list = []):
 def define_grid(Crd_data, Space_resolution):
     B,L = [],[]
     for cur_site in Crd_data.keys():
+        if Crd_data[cur_site]["VALUE"] == "False":
+            continue
         B.append(Crd_data[cur_site]["BLH"][0])
         L.append(Crd_data[cur_site]["BLH"][1])
     B,L = np.array(B),np.array(L)
@@ -151,6 +161,10 @@ def scatter_map_mark(map,crd_data = {},Site_group = {}):
     for cur_group in Site_group.keys():
         index_color = index_color + 1
         for cur_site in Site_group[cur_group]:
+            if cur_site not in crd_data.keys():
+                continue
+            if crd_data[cur_site]["VALUE"] == "False":
+                continue
             if cur_group == "Client":
                 map.scatter(crd_data[cur_site]["BLH"][1],crd_data[cur_site]["BLH"][0],marker='*',s=200,facecolor='#34BF49',edgecolor='k', linewidth=1)
             else:
@@ -162,10 +176,12 @@ def scatter_map_mark(map,crd_data = {},Site_group = {}):
 def write_map_mark_name(map,crd_data):
     texts=[]
     for cur_site in crd_data.keys():
+        if crd_data[cur_site]["VALUE"] == "False":
+            continue
         texts.append(plt.text(crd_data[cur_site]["BLH"][1],crd_data[cur_site]["BLH"][0],cur_site,fontdict=font_text))
     adjust_text(texts)
 
-def Plot_basemap_site(CRD_file = "", SHP_file = [], Site_group = {}, Show = True, Space_resolution = 0.1):
+def Plot_basemap_site(CRD_file = "", SHP_file = [], Site_group = {}, Show = True, Space_resolution = 0.1, Sys_list = {}):
     #=== Load Data ===#
     site_list = []
     for cur_group in Site_group.keys():
@@ -173,9 +189,9 @@ def Plot_basemap_site(CRD_file = "", SHP_file = [], Site_group = {}, Show = True
         #     continue
         for cur_site in Site_group[cur_group]:
             site_list.append(cur_site)
-    crd_data = load_data(CRD_file[0],site_list)
-    crd_data_1 = load_data_caster(CRD_file[1],site_list)
-    crd_data.update(crd_data_1)
+    crd_data = load_data(CRD_file,site_list,Sys_list)
+    # crd_data_1 = load_data_caster(CRD_file[1],site_list)
+    # crd_data.update(crd_data_1)
     #=== Statistics ===#
     corner_grid = define_grid(crd_data, Space_resolution)
     #=== Plot ===#
