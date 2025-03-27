@@ -8,8 +8,8 @@ import matplotlib as mpl
 mpl.use("TkAgg")
 import matplotlib.pyplot as plt
 import Lib_Plot_Basemap as basemap
-obs_path = r"/Users/hanjunjie/Gap1/Data/Centipete/Data"
-out_crd_path = r"/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Site_CRD_New/Centipete_France_40.crd"
+obs_path = r"/Users/hanjunjie/Gap1/Data/2024/OBS_IGS/114"
+out_crd_path = r"/Users/hanjunjie/Gap1/Site_CRD_New/IGS_ALL_SYS.crd"
 is_crd_out = True
 out_csv_path = r"/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Site_CRD_New/Centipete_France_40.csv"
 is_xml_out = False
@@ -26,6 +26,8 @@ for cur_obs in obs_list:
     cur_path = os.path.join(obs_path, cur_obs)
     cur_marker = ""
     cur_obs_num = 0
+    cur_marker = cur_obs[0:4]
+    all_data[cur_marker] = {}
     with open(cur_path,'rt') as f:
         for line in f:
             if "END OF HEADER" in line:
@@ -37,7 +39,7 @@ for cur_obs in obs_list:
                     break
             if "MARKER NAME" in line and cur_marker == "" and line[0] != " ":
                 value = line.split(" ")
-                cur_marker = value[0]
+                cur_marker = value[0][0:4].upper()
                 all_data[cur_marker] = {}
                 select_site.append(value[0][0:4])
             if "APPROX POSITION XYZ" in line and cur_marker != "" and "COMMENT" not in line:
@@ -51,7 +53,7 @@ for cur_obs in obs_list:
                 sys_type.append(value[0])
                 cur_obs_num = int(value[1])
                 for cur_type in value:
-                    if "SYS" != cur_type and "/" != cur_type and "#" != cur_type and "OBS" != cur_type and "TYPES" != cur_type and len(cur_type) == 3:
+                    if "SYS" != cur_type and "/" != cur_type and "#" != cur_type and "OBS" != cur_type and "TYPES" != cur_type and len(cur_type) >=2:
                         if cur_type[0:2] not in sys_type:
                             sys_type.append(cur_type[0:2])
                 while cur_obs_num - 13 > 0:
@@ -59,7 +61,7 @@ for cur_obs in obs_list:
                     line = next(f)
                     value = line.split()
                     for cur_type in value:
-                        if "SYS" != cur_type and "/" != cur_type and "#" != cur_type and "OBS" != cur_type and "TYPES" != cur_type and len(cur_type) == 3:
+                        if "SYS" != cur_type and "/" != cur_type and "#" != cur_type and "OBS" != cur_type and "TYPES" != cur_type and len(cur_type) >=2:
                             if cur_type[0:2] not in sys_type:
                                 sys_type.append(cur_type[0:2])
                 cur_obs_num = 0

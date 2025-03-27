@@ -238,6 +238,82 @@ def plot_ZWD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = T
     if Show:
         plt.show()
 
+def plot_MultiDay_ZWD_delta_CDF(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True, Start_hour = 0, End_hour = 24, Start = [], End = [], Save_dir = ""):
+    figP,axP = plt.subplots(1,1,figsize=(8,6),sharey=True,sharex=True)
+    mode_list = []
+    index = 0
+    max_error = 0
+    plot_all_error,plot_all_percent = [],{}
+    for cur_mode in Plot_Data.keys():
+        cur_data_array = abs(np.array(Plot_Data[cur_mode]["ZWD"]))
+        cur_max = cur_data_array.max()
+        if cur_max > max_error:
+            max_error = cur_max
+    inter_num = 1000
+    for cur_mode in Plot_Data.keys():
+        mode_list.append(cur_mode)
+        cur_percent = []
+        cur_data_array = abs(np.array(Plot_Data[cur_mode]["ZWD"]))
+        error_range = np.arange(0,max_error,max_error/inter_num)
+        for cur_error in error_range:
+            cur_error_index = cur_data_array[cur_data_array <= cur_error]
+            cur_percent.append(cur_error_index.size/cur_data_array.size*100)
+        axP.plot(error_range,cur_percent,linewidth=2,color = color_list[index%3])
+        plot_all_percent[cur_mode] = (cur_percent)
+        index = index + 1
+        
+    
+    axP.legend(mode_list,prop=font_legend,
+            framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=3, 
+            borderaxespad=0,bbox_to_anchor=(1,1.08),loc=1)
+    # Zoom
+    axins1 = axP.inset_axes(((1/2.5,1/10,0.55,0.7)))
+    index = 0
+    for cur_mode in Plot_Data.keys():
+        index_plot = (error_range >= 5) & (error_range <= 15)
+        axins1.plot(error_range[index_plot],np.array(plot_all_percent[cur_mode])[index_plot],linewidth=2,color = color_list[index%3])
+        index = index + 1
+    mark_inset(axP,axins1,loc1=3,loc2=1,fc = "none",ec="k",lw=1,ls = '--')
+
+    axP.set_xlabel('ZTD errors (mm)',font_label)
+    axP.set_ylabel('Cumulative distribution function (%)',font_label)
+    labels = axP.get_yticklabels() + axP.get_xticklabels() + axins1.get_yticklabels() + axins1.get_xticklabels()
+    if Ylim != 0:
+        axP.set_ylim(-Ylim,Ylim)
+    [label.set_fontsize(xtick_size) for label in labels]
+    [label.set_fontname('Arial') for label in labels]
+    if Show:
+        plt.show()
+    else:
+        file_name = ""
+        for cur_mode in mode_list:
+            file_name = file_name + "-{}".format(cur_mode)
+        plt.savefig(os.path.join(Save_dir,"ZWD-CDF{}.jpg".format(file_name)),dpi=600)
+    
+def plot_MultiDay_ZWD_delta_DISTRIBUTION(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True, Start_hour = 0, End_hour = 24, Start = [], End = [], Save_dir = ""):
+    figP,axP = plt.subplots(1,1,figsize=(12,6),sharey=True,sharex=True)
+    mode_list = []
+    index = 0
+    max_error = 0
+    inter_num = 100
+    for cur_mode in Plot_Data.keys():
+        cur_percent,cur_error = [],[]
+        cur_data_array = (np.array(Plot_Data[cur_mode]["ZWD"]))
+        cur_max = cur_data_array.max()
+        cur_min = cur_data_array.min()
+        cur_percent = []
+        error_range = np.arange(cur_min,cur_max,(cur_max - cur_min)/inter_num)
+        for i in range(error_range.size-1):
+            cur_error.append((error_range[i] + error_range[i+1])/2)
+            cur_error_index = cur_data_array[(cur_data_array <= error_range[i+1]) & (cur_data_array > error_range[i])]
+            cur_percent.append(cur_error_index.size/cur_data_array.size*100)
+        axP.plot(cur_error,cur_percent,linewidth=2,color = color_list[index%3])
+        index = index + 1
+    
+    if Show:
+        plt.show()
+
+
 def plot_MultiDay_ZWD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True, Start_hour = 0, End_hour = 24, Start = [], End = [], Save_dir = ""):
     #=== Plot ===#
     figP,axP = plt.subplots(1,1,figsize=(12,6),sharey=True,sharex=True)
@@ -256,7 +332,7 @@ def plot_MultiDay_ZWD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, L
         mode_list.append(cur_mode)
     #===Set Label===#
     axP.set_xticks(XlabelSet[1])
-    axP.set_xticklabels(XlabelSet[0])
+    # axP.set_xticklabels(XlabelSet[0])
     labels = axP.get_yticklabels() + axP.get_xticklabels()
     if Ylim != 0:
         axP.set_ylim(-Ylim,Ylim)
@@ -271,7 +347,7 @@ def plot_MultiDay_ZWD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, L
         doy = tr.ymd2doy(Start[0],Start[1],Start[2],Start[3] + cur_hour,Start[4],Start[5])
         [year,mon,day] = tr.doy2ymd(Start[0],doy)
         XlabelDate.append("{}-{:0>2}-{:0>2}".format(year,mon,day))
-    # axP.set_xticklabels(XlabelDate)
+    axP.set_xticklabels(XlabelDate)
     #===Set text===#
     MRS_str = "RMS:"
     RMS_value = []
@@ -844,7 +920,7 @@ def plot_percent_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 
     [label.set_fontsize(xtick_size) for label in labels]
     [label.set_fontname('Arial') for label in labels]
     axP.set_xlabel('Time (mins)',font_label)
-    axP.set_ylabel('ZWD errors (cm)',font_label)
+    axP.set_ylabel('ZTD errors (cm)',font_label)
     #===Set legend===#
     axP.legend(mode_list,prop=font_legend,
             framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=3, 
@@ -958,7 +1034,7 @@ def plot_box_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 3600
     [label.set_fontsize(xtick_size) for label in labels]
     [label.set_fontname('Arial') for label in labels]
     axP.set_xlabel('Time range (mins)',font_label)
-    axP.set_ylabel('ZWD errors (cm)',font_label)
+    axP.set_ylabel('ZTD errors (mm)',font_label)
     # #===Set legend===#  
     handle_list = []
     for index in range(2):
@@ -1050,8 +1126,8 @@ def Plot_MultiDay_timeseries_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=
             cur_hour_in_day = plot_time
             while cur_hour_in_day >24:
                 cur_hour_in_day = cur_hour_in_day - 24
-            # if cur_hour_in_day >= Start_hour and cur_hour_in_day <= End_hour:
-            #     continue
+            if cur_hour_in_day <= Start_hour or cur_hour_in_day >= End_hour:
+                continue
             if ((plot_time >= Start[3] and plot_time <= (Start[3]+duration_time)) or All):
                 if Fixed and all_data[cur_mode][cur_time]["AMB"] != 1:
                     continue
@@ -1076,6 +1152,10 @@ def Plot_MultiDay_timeseries_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=
         plot_MultiDay_GRD_raw(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Start_hour=Start_hour, End_hour = End_hour, Start = Start, End = End, Save_dir = Save_dir)
     elif Plot_type == "GRD_DELTA":
         plot_MultiDay_GRD_delta(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Start_hour=Start_hour, End_hour = End_hour, Start = Start, End = End, Save_dir = Save_dir)
+    if Plot_type == "ZWD_DELTA_CDF":
+        plot_MultiDay_ZWD_delta_CDF(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Start_hour=Start_hour, End_hour = End_hour, Start = Start, End = End, Save_dir = Save_dir)
+    if Plot_type == "ZWD_DELTA_DISTRIBUTION":
+        plot_MultiDay_ZWD_delta_DISTRIBUTION(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Start_hour=Start_hour, End_hour = End_hour, Start = Start, End = End, Save_dir = Save_dir)
 
 def Plot_MultiDay_percent_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5,Save_dir="",Fixed = False,Show=True,All=False,Time_type = "GPST",Delta_xlabel = 1,Delay_model = 0,Legend = False,Sigma=3,Signum=0,Start_hour = 0,End_hour = 0,Inter_zpd = False, Reconvergence = 3600, Recon_list = [], Percent = 0.9):
     all_data,data_raw,data_ref = {},{},{}

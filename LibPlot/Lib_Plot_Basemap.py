@@ -60,17 +60,28 @@ def load_data(CRD_file,site_list = [],Sys_list = {}):
             B.append(blh[0])
             L.append(blh[1])
             crd_data[value[0]]["SYS"] = ""
+            cur_sys_list = {}
+            for i in range(len(value)-1):
+                if i >= 4:
+                    # crd_data[value[0]]["SYS"] = crd_data[value[0]]["SYS"] + value[i]
+                    value_list = value[i].split(",")
+                    if value_list[0][0] not in cur_sys_list:
+                        cur_sys_list[value_list[0][0]] = []
+                    for cur_value in value_list:
+                        cur_sys_list[value_list[0][0]].append(cur_value[-2:])
+            for cur_sys in cur_sys_list:
+                crd_data[value[0]]["SYS"] = crd_data[value[0]]["SYS"] + cur_sys
             if len(Sys_list) > 0:
-                for i in range(len(value)-1):
-                    if i >= 4:
-                        crd_data[value[0]]["SYS"] = crd_data[value[0]]["SYS"] + value[i]
-                        value_list = value[i].split(",")
-                        if value_list[0][0] in Sys_list:
-                            for cur_band in Sys_list[value_list[0][0]]:
-                                if cur_band not in value_list and cur_band != value_list[0][-2:]:
-                                    crd_data[value[0]]["VALUE"] = "False"
-                        else:
-                            crd_data[value[0]]["VALUE"] = "False"
+                for cur_sys in Sys_list:
+                    if cur_sys in cur_sys_list:
+                        for cur_band in Sys_list[cur_sys]:
+                            if cur_band not in cur_sys_list[cur_sys]:
+                                crd_data[value[0]]["VALUE"] = "False"
+                    else:
+                        crd_data[value[0]]["VALUE"] = "False"
+            if len(Sys_list) > 0:
+                if len(cur_sys_list) != len(Sys_list):
+                    crd_data[value[0]]["VALUE"] = "False"
             # if blh[0] < 54.8 or blh[0] > 58.8 or blh[1] < 9 or blh[1] > 16.5:
             #     del crd_data[value[0]]
     return crd_data
@@ -121,6 +132,34 @@ def define_grid(Crd_data, Space_resolution):
     print("Top Left Corner : ({:>.4f},{:>.4f})".format(minLon,maxLat))
     return ([minLon,minLat,maxLon,maxLat, math.ceil(delta_Lat / Space_resolution), math.ceil(delta_Lon / Space_resolution)])
 
+def setlabeltick_global(map,corner_grid,space_resolution):
+    corner_grid[0],corner_grid[2],corner_grid[5] = -180,180,24
+    corner_grid[1],corner_grid[3],corner_grid[4] = -90,90,12
+    map.drawparallels(circles=np.linspace(corner_grid[1], corner_grid[3], corner_grid[4] + 1),labels=[0, 0, 0, 0], color='gray',fontsize = tick_size,linewidth=0.5)
+    map.drawmeridians(meridians=np.linspace(corner_grid[0], corner_grid[2], corner_grid[5] + 1),labels=[0, 0, 0, 0], color='gray',fontsize = tick_size,linewidth=0.5)
+    xlabellon,xlabeltext1,xlabeltext2 = [], [], []
+    cur_label = corner_grid[0]
+    space_resolution = 15
+    for i in range(corner_grid[5] + 1):
+        xlabellon.append(cur_label)
+        if i%2==0:
+            xlabeltext1.append('%.1f$^\circ$E'%(cur_label))
+            xlabeltext2.append('')
+            
+        else:
+            xlabeltext2.append('%.1f$^\circ$E'%(cur_label))
+            xlabeltext1.append('')
+        cur_label = cur_label + space_resolution
+    ylabellat,ylabeltext = [], []
+    cur_label = corner_grid[1]
+    space_resolution = 15
+    for i in range(corner_grid[4] + 1):
+        ylabellat.append(cur_label)
+        ylabeltext.append('%.1f$^\circ$N'%(cur_label))
+        cur_label = cur_label + space_resolution
+    plt.yticks(ylabellat,ylabeltext,size = tick_size)
+    plt.xticks(xlabellon,xlabeltext1,size = tick_size)
+
 def setlabeltick(map,corner_grid,space_resolution):
     map.drawparallels(circles=np.linspace(corner_grid[1], corner_grid[3], corner_grid[4] + 1),labels=[0, 0, 0, 0], color='gray',fontsize = tick_size,linewidth=0.5)
     map.drawmeridians(meridians=np.linspace(corner_grid[0], corner_grid[2], corner_grid[5] + 1),labels=[0, 0, 0, 0], color='gray',fontsize = tick_size,linewidth=0.5)
@@ -129,6 +168,7 @@ def setlabeltick(map,corner_grid,space_resolution):
     for i in range(corner_grid[5] + 1):
         xlabellon.append(cur_label)
         xlabeltext.append('%.1f$^\circ$E'%(cur_label))
+            
         cur_label = cur_label + space_resolution
     ylabellat,ylabeltext = [], []
     cur_label = corner_grid[1]
@@ -156,8 +196,8 @@ def scatter_map_mark(map,crd_data = {},Site_group = {}):
                 break
     
     index_color = -1
-    marker_list = ['v','*']
-    legend_list = [0,0]
+    marker_list = ['v','v','v']
+    legend_list = [0,0,0]
     for cur_group in Site_group.keys():
         index_color = index_color + 1
         for cur_site in Site_group[cur_group]:
@@ -168,15 +208,24 @@ def scatter_map_mark(map,crd_data = {},Site_group = {}):
             if cur_group == "Client":
                 map.scatter(crd_data[cur_site]["BLH"][1],crd_data[cur_site]["BLH"][0],marker='*',s=200,facecolor='#34BF49',edgecolor='k', linewidth=1)
             else:
+                index_color = 0
+                # if crd_data[cur_site]["SYS"] == "GEC":
+                #     index_color = 0
+                # if crd_data[cur_site]["SYS"] == "GE":
+                #     index_color = 1
+                # if crd_data[cur_site]["SYS"] == "G":
+                #     index_color = 2
                 legend_list[index_color] = map.scatter(crd_data[cur_site]["BLH"][1],crd_data[cur_site]["BLH"][0],marker=marker_list[index_color],s=100,facecolor=color_list[index_color%3],edgecolor="k", linewidth=1)
     
-    # plt.legend((legend_list[0],legend_list[1]),["EPN","Centipede"],prop = font_text,framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=1, 
+    # plt.legend((legend_list[0],legend_list[1],legend_list[2]),["GEC","GE","G"],prop = font_text,framealpha=0,facecolor='none',ncol=4,numpoints=5,markerscale=1, 
     #         borderaxespad=0,bbox_to_anchor=(1,1.1),loc=1)
 
 def write_map_mark_name(map,crd_data):
     texts=[]
     for cur_site in crd_data.keys():
         if crd_data[cur_site]["VALUE"] == "False":
+            continue
+        if cur_site[0] != "N":
             continue
         texts.append(plt.text(crd_data[cur_site]["BLH"][1],crd_data[cur_site]["BLH"][0],cur_site,fontdict=font_text))
     adjust_text(texts)
@@ -199,8 +248,11 @@ def Plot_basemap_site(CRD_file = "", SHP_file = [], Site_group = {}, Show = True
     # fig = plt.figure(figsize=(12,15))
     # set range
     map = Basemap(llcrnrlon=corner_grid[0], llcrnrlat=corner_grid[1], urcrnrlon=corner_grid[2], urcrnrlat=corner_grid[3], resolution='c',projection='cyl')
+    # map = Basemap(llcrnrlon=-180, llcrnrlat=-90, urcrnrlon=180, urcrnrlat=90, resolution='c',projection='cyl')
+    # map.shadedrelief(scale=1)
     # set lables & ticks
     setlabeltick(map,corner_grid,Space_resolution)
+    # setlabeltick_global(map,corner_grid,Space_resolution)
     # plot site
     scatter_map_mark(map,crd_data,Site_group)
     # Marker Name

@@ -167,6 +167,9 @@ def compare_aug(data_raw = {},data_model = {}):
                 continue
             if sat in ref_sat_list:
                 continue
+            if "ELE" in data_raw[time][sat].keys():
+                if data_model[time][sat]['ELE'] < 15:
+                    continue
             if sat not in all_data[time].keys() and sat[0] in ref_data[time].keys():
                 all_data[time][sat], all_data[time][sat[0]] = {},{}
             for type in data_model[time][sat].keys():
@@ -285,8 +288,8 @@ def plot_ION_GEC(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = Tru
         sat_list[cur_sat[0]].append(cur_sat)
     
     #===Set Label===#
-    axP.set_xticklabels(XlabelSet[0])
     axP.set_xticks(XlabelSet[1])
+    axP.set_xticklabels(XlabelSet[0])
     labels = axP.get_yticklabels() + axP.get_xticklabels()
     if Ylim != 0:
         if Plot_type[0:3] == "ION":
@@ -307,15 +310,79 @@ def plot_ION_GEC(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = Tru
             sys_rms[cur_sat[0]],sys_mean[cur_sat[0]] = [],[]
         sys_rms[cur_sat[0]].append(np.sqrt(np.mean(np.array(Plot_Data[cur_sat][cur_plot_type])**2))*100)
         sys_mean[cur_sat[0]].append(np.mean(Plot_Data[cur_sat][cur_plot_type]))
+    All_sys_rms,All_sys_mean = [],[]
+    sys_str = ""
     for cur_sys in sys_rms.keys():
-        MRS_str = "RMS = {:.2f} cm, MEAN = {:.2f} cm".format(np.mean(sys_rms[cur_sys]),np.mean(sys_mean[cur_sys])) 
-        print("{}: {}".format(cur_sys,MRS_str))   
-    # ax_range = axP.axis()
-    # axP.text(ax_range[0],ax_range[3]+Ylim/30,MRS_str,font_text)
+        All_sys_rms.append(np.mean(sys_rms[cur_sys]))
+        All_sys_mean.append(np.mean(sys_mean[cur_sys]))
+        sys_str = sys_str + cur_sys
+    MRS_str = "RMS = {:.2f} cm, MEAN = {:.2f} cm".format(np.mean(All_sys_rms),np.mean(All_sys_mean)) 
+    print("{}: {}".format(sys_str,MRS_str))   
+    ax_range = axP.axis()
+    axP.text(ax_range[0],ax_range[3]+Ylim/30,MRS_str,font_text)
     
 
     #===Set Legend===#
-    plt.show()
+    if Show:
+        plt.show()
+
+def plot_ION_GEC_TIMEDIFF(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True, Plot_type = "ION"):
+    #=== Plot ===#
+    if Legend:
+        figP,axP = plt.subplots(1,1,figsize=(15,6),sharey=True,sharex=True)
+    else:
+        figP,axP = plt.subplots(1,1,figsize=(12,6),sharey=True,sharex=True)
+    # sys_plotindex = {"G":0,"E":1,"C":2}
+    sat_list = {"G":[],"E":[],"C":[]}
+    if Plot_type[0:3] == "ION":
+        cur_plot_type = "ION1"
+    elif Plot_type[0:4] == "DION":
+        cur_plot_type = "dION1"
+    for cur_sat in Plot_Data.keys():
+        if cur_plot_type not in Plot_Data[cur_sat].keys():
+            continue
+        # axP.scatter(Plot_Data[cur_sat]["TIME"],Plot_Data[cur_sat][cur_plot_type],s=3)
+        axP.scatter(Plot_Data[cur_sat]["TIME"][:-1],np.diff(np.array(Plot_Data[cur_sat][cur_plot_type]),1),s=3)
+        sat_list[cur_sat[0]].append(cur_sat)
+    
+    #===Set Label===#
+    axP.set_xticks(XlabelSet[1])
+    axP.set_xticklabels(XlabelSet[0])
+    labels = axP.get_yticklabels() + axP.get_xticklabels()
+    if Ylim != 0:
+        if Plot_type[0:3] == "ION":
+            axP.set_ylim(-Ylim,Ylim)
+        else:
+            axP.set_ylim(0,Ylim)
+    [label.set_fontsize(xtick_size) for label in labels]
+    [label.set_fontname('Arial') for label in labels]
+    axP.set_xlabel('GPS time (hour)',font_label)
+    axP.set_ylabel('Difference of Ionosphere Delay correction (m)',font_label)
+
+    #===Set text===#
+    sys_rms,sys_mean = {},{}
+    for cur_sat in Plot_Data.keys():
+        if cur_plot_type not in Plot_Data[cur_sat].keys():
+            continue
+        if cur_sat[0] not in sys_rms.keys():
+            sys_rms[cur_sat[0]],sys_mean[cur_sat[0]] = [],[]
+        sys_rms[cur_sat[0]].append(np.sqrt(np.mean(np.array(np.diff(np.array(Plot_Data[cur_sat][cur_plot_type]),1))**2))*100)
+        sys_mean[cur_sat[0]].append(np.mean(np.diff(np.array(Plot_Data[cur_sat][cur_plot_type]),1)))
+    All_sys_rms,All_sys_mean = [],[]
+    sys_str = ""
+    for cur_sys in sys_rms.keys():
+        All_sys_rms.append(np.mean(sys_rms[cur_sys]))
+        All_sys_mean.append(np.mean(sys_mean[cur_sys]))
+        sys_str = sys_str + cur_sys
+    MRS_str = "RMS = {:.2f} cm, MEAN = {:.2f} cm".format(np.mean(All_sys_rms),np.mean(All_sys_mean)) 
+    print("{}: {}".format(sys_str,MRS_str))   
+    ax_range = axP.axis()
+    axP.text(ax_range[0],ax_range[3]+Ylim/30,MRS_str,font_text)
+    
+
+    #===Set Legend===#
+    if Show:
+        plt.show()
 
 def plot_ZWD(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True, Plot_type = "ZWD"):
     #=== Plot ===#
@@ -447,7 +514,8 @@ def Plot_timeseries_aug_compare(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0
         data_compare = compare_aug(data_raw,data_model)
     else:
         data_compare = expand_trp(data_raw)
-
+    if "TIMEDIFF" in Plot_type:
+        data_compare = data_raw
     #=== Data Convert ===#
     # [XLabel,XTick,cov_time,begT,LastT]=glv.xtick(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
     [XLabel,XTick,cov_time,begT,LastT]=glv.xtick_min(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
@@ -469,6 +537,8 @@ def Plot_timeseries_aug_compare(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0
 
     #=== Plot ===#
     if "ION" in Plot_type:
+        if "TIMEDIFF" in Plot_type:
+            plot_ION_GEC_TIMEDIFF(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Legend = Legend, Plot_type = Plot_type)
         if "GEC" in Plot_type:
             plot_ION_GEC(Plot_Data=PLOT_ALL, Ylim=Ylim, XlabelSet = [XLabel,XTick], Show=Show, Legend = Legend, Plot_type = Plot_type)
         else:

@@ -15,18 +15,18 @@ import Lib_Plot_ROTI as PlotROTI
 
 
 
-file_info_list = {"ROTI_NYAL":["/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023054_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023055_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023056_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023057_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023058_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023059_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023060_GEC.ismr"],
-                  "ROTI_SONS":["/Users/hanjunjie/Gap1/LX/ROTI/SONS2023054_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/SONS2023055_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/SONS2023056_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/SONS2023057_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/SONS2023058_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/SONS2023059_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/SONS2023060_GEC.ismr"],
-                  "ROTI_NYAL":["/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023054_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023055_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023056_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023057_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023058_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023059_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2023060_GEC.ismr"],
+file_info_list = {"ROTI_  30S":["/Users/hanjunjie/Gap1/Magnetic_storm/Server/ROTI_HK/30S_5MIN/HKSC2021305_GEC.ismr"],
+                  "ROTI_  1S-10EPOCHS":  ["/Users/hanjunjie/Gap1/Magnetic_storm/Server/ROTI_HK/1S_10S/HKSC2021305_GEC.ismr"],
+                  "ROTI_  1S-10MINS":  ["/Users/hanjunjie/Gap1/Magnetic_storm/Server/ROTI_HK/1S_5MIN/HKSC2021305_GEC.ismr"],
                 }
-file_info_list = {
-                  "ROTI_NYAL":["/Users/hanjunjie/Gap1/LX/ROTI/NYAL2021176_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2021177_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2021178_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2021179_GEC.ismr"],
-                  "Dst":["/Users/hanjunjie/Gap1/LX/isgi_data_1732176910_490726/Dst_2021-01-01_2024-06-30_P.dat"]
-                }
+# file_info_list = {
+#                   "ROTI_NYAL":["/Users/hanjunjie/Gap1/LX/ROTI/NYAL2021176_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2021177_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2021178_GEC.ismr","/Users/hanjunjie/Gap1/LX/ROTI/NYAL2021179_GEC.ismr"],
+#                   "Dst":["/Users/hanjunjie/Gap1/LX/isgi_data_1732176910_490726/Dst_2021-01-01_2024-06-30_P.dat"]
+#                 }
 
-start_time = [2021,6,25,0,0,0]
-end_time = [2021,7,1,0,0,0]
-plot_type = ["ROTI","Dst"] # ROTI_GEC ROTI_G_E_C ROTI_Multi_Site #ROTI Dst
+start_time = [2021,11,1,0,0,0]
+end_time = [2021,11,1,24,0,0]
+plot_type = ["ROTI_Multi_Site"] # ROTI_GEC ROTI_G_E_C ROTI_Multi_Site #ROTI Dst
 ylim = 0
 save_dir = ""
 show = True

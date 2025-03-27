@@ -145,7 +145,7 @@ def ymd2mjd(Year,Mon,Day):
     mjd = int(365.25*Year)+int(30.6001*(Mon+1))+Day-679019
     return mjd
 
-def ymd2doy(year,month,day,hour,minute,second):
+def ymd2doy(year,month,day,hour=0,minute=0,second=0):
     doy = floor(month*275/9)-floor((month+9)/12)*(floor((year-4*floor(year/4)+2)/3)+1)+day + hour/24-30
     return int(doy)
 
@@ -154,6 +154,7 @@ def doy2ymd(year,doy):
     time_now = basetime + datetime.timedelta(doy - 1)
     month = time_now.month
     day = time_now.day
+    year = time_now.year
     return [year,month,day]
 
 def transformlat(lng, lat):

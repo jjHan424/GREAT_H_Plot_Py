@@ -15,14 +15,14 @@ import Lib_Plot_AUG as PlotAUG
 
 #Setup Plot
 file_info_list = [
-    "/Users/hanjunjie/Gap1/Data/2023/AUG/341/TERS-GEC3-FIXED-30-B2b.aug",
-    "/Users/hanjunjie/Gap1/Data/2023/AUG/080/FFMJ-GEC3-FIXED-30.aug",
+    "/Users/hanjunjie/Downloads/HKMW-GEC2-30.diff",
+    "/Users/hanjunjie/Gap1/Data/2023/AUG/080/BRUX-GEC3-FLOAT-30.aug",
     ] #[Raw, Model]
 
-start_time = [2023,12,7,2,0,0]
-end_time = [2023,12,7,24,0,0]
-plot_type = "NSAT_RAW" # ION, ZWD, NSAT_RAW, NSAT_MODEL, NSAT_COM DION DTRP _GEC
-ylim = 0.5
+start_time = [2021,11,1,2,0,0]
+end_time = [2021,11,1,24,0,0]
+plot_type = "DION" # ION, ZWD, NSAT_RAW, NSAT_MODEL, NSAT_COM DION DTRP _GEC
+ylim = 0.2
 save_dir = ""
 show = True
 all = False

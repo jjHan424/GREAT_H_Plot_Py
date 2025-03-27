@@ -221,17 +221,17 @@ def plot_Kp_Dst(PLOT_ALL,Start,End,Show):
     [cur_week,cur_sow] = [start_week,start_sow]
     while (cur_year*365 + cur_doy) <= (End[0]*365 + end_doy):
         x_ticks.append((cur_week-start_week)*7*24+(cur_sow-start_sow)/3600)
-        x_ticklabels.append("{}-{:0>2}-{}".format(Cur_time[0],Cur_time[1],int(Cur_time[2])))
+        x_ticklabels.append("{}-{:0>2}-{:0>2}".format(Cur_time[0],Cur_time[1],int(Cur_time[2])))
         #=== Delta month
-        Cur_time[1] = Cur_time[1] + delta_month
-        if Cur_time[1] > 12:
-            Cur_time[0] = Cur_time[0] + 1
-            Cur_time[1] = Cur_time[1] - 12
-        cur_year = Cur_time[0]
+        # Cur_time[1] = Cur_time[1] + delta_month
+        # if Cur_time[1] > 12:
+        #     Cur_time[0] = Cur_time[0] + 1
+        #     Cur_time[1] = Cur_time[1] - 12
+        # cur_year = Cur_time[0]
         #=== Delta Day
-        # mjd = tr.ymd2mjd(Cur_time[0],Cur_time[1],Cur_time[2])
-        # mjd = mjd + delta_day
-        # [Cur_time[0],Cur_time[1],Cur_time[2]] = tr.mjd2ymd(mjd)
+        mjd = tr.ymd2mjd(Cur_time[0],Cur_time[1],Cur_time[2])
+        mjd = mjd + delta_day
+        [Cur_time[0],Cur_time[1],Cur_time[2]] = tr.mjd2ymd(mjd)
 
         cur_doy = tr.ymd2doy(Cur_time[0],Cur_time[1],Cur_time[2],Cur_time[3],Cur_time[4],Cur_time[5])
         [cur_week,cur_sow] = tr.ymd2gpst(Cur_time[0],Cur_time[1],Cur_time[2],Cur_time[3],Cur_time[4],Cur_time[5])

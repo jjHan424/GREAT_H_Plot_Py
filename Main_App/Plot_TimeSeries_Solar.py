@@ -15,13 +15,13 @@ import Lib_Plot_Solar as PlotSolar
 
 #Format IAGA-2002
 
-# file_info_list = [["Kp","/Users/hanjunjie/Gap1/LX/isgi_data_1732176731_517437/Kp_2021-01-01_2024-10-31_D.dat"],
-#                   ["Dst","/Users/hanjunjie/Gap1/LX/isgi_data_1732176910_490726/Dst_2021-01-01_2024-06-30_P.dat"]]
-file_info_list = [["Kp","/Users/hanjunjie/Gap1/LX/Kp_2016-01-01_2020-01-01_D.dat"],
-                  ["Dst","/Users/hanjunjie/Gap1/LX/Dst_2016-01-01_2020-01-01_D.dat"]]
+file_info_list = [["Kp","/Users/hanjunjie/Gap1/LX/isgi_data_1732176731_517437/Kp_2021-01-01_2024-10-31_D.dat"],
+                  ["Dst","/Users/hanjunjie/Gap1/LX/Dst_2021-01-01_2024-06-30_P.dat"]]
+# file_info_list = [["Kp","/Users/hanjunjie/Gap1/LX/Kp_2016-01-01_2020-01-01_D.dat"],
+#                   ["Dst","/Users/hanjunjie/Gap1/LX/Dst_2016-01-01_2020-01-01_D.dat"]]
 
-start_time = [2016,1,1,0,0,0]
-end_time = [2020,1,1,0,0,0]
+start_time = [2024,4,16,0,0,0]
+end_time = [2024,6,16,0,0,0]
 plot_type = ["Kp","Dst"] # Kp ap Dst
 save_dir = ""
 show = True

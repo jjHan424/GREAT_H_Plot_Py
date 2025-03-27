@@ -14,19 +14,18 @@ import trans as tr
 import Lib_Plot_Basemap as PlotBasemap
 
 # crd_file = "/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/CRDSITE/CMNC_ALL.crd"
-crd_file = "/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Site_CRD_New/ALL.crd"
+crd_file = "/Users/hanjunjie/Phd_1/0. GREAT/HJX/_PPPRTK/station.crd"
 # crd_file = "/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/CRDSITE/CHN_HK_16.crd"
 
-shp_file = ["/Users/hanjunjie/tools/GREAT_H_Plot_Py/SysFile/Shp_File/world-administrative-boundaries/world-administrative-boundaries"]
+shp_file = ["/Users/hanjunjie/tools/GREAT_H_Plot_Py/SysFile/Shp_File/gadm36_CHN_shp/gadm36_CHN_3"]
 
 site_group = {
-              "EPN":['SHOE', 'BRUX', 'MAN2', 'DENT', 'IGNF', 'REDU', 'VFCH', 'DOUR', 'VLIS', 'WARE', 'AUTN', 'LIL2', 'HERT', 'MLVL'],
-              "Client":["ENSG"]
+           "1":["N052"]
               } 
-# sys_list = {"G":["L1","L2"],"E":["L1","L5","L7"],"C":["L2","L6","L7"]}
+sys_list = {}
 show = True
-space_resolution = 1
-# site_group = {1:['TLSG', 'TLMF', 'PUYV', 'TLSE', 'CREU', 'BCLN', 'EBRE', 'LLIV', 'CASE', 'ESCO', 'EGLT', 'BELL', 'UEAU']}
+space_resolution = 0.1
+site_group = {}
 sys_list = {}
 PlotBasemap.Plot_basemap_site(CRD_file = crd_file, SHP_file = shp_file, Site_group = site_group, Space_resolution = space_resolution, Sys_list = sys_list)
 

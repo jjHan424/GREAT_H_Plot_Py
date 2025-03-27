@@ -72,7 +72,7 @@ xtick_size = 20
 color_list = ["#0099E5","#34BF49","#FF4C4C"]
 
 def xtick_min(time,year,mon,day,starttime,LastT,deltaT):
-    if "+" in time:
+    if "+" in time or "-" in time:
         end_time = len(time)
         delta_Time = int(time[4:end_time]) + starttime
         begT = int(time[4:end_time]) + starttime
