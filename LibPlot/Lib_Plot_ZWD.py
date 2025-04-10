@@ -14,7 +14,7 @@ import matplotlib
 import matplotlib.patches
 from matplotlib.widgets import EllipseSelector
 from matplotlib.patches import Rectangle
-sys.path.insert(0,os.path.dirname(__file__)+'/../LibBase')
+sys.path.insert(0,os.path.join(os.path.dirname(__file__),'..','LibBase'))
 from matplotlib.markers import MarkerStyle
 import numpy as np
 import matplotlib as mpl
@@ -28,7 +28,6 @@ from numpy.core.fromnumeric import shape, size
 import dataprocess as dp
 import matplotlib.colors as colors
 # from matplotlib.pyplot import MultipleLocator
-import seaborn as sns
 import math
 import trans as tr
 import glv
@@ -140,7 +139,10 @@ def loaddata_ref(File_name,all_data = {}, Inter_zpd = False):
             if epoch_flag and line[0] != "*":
                 value = line.split()
                 time_value = value[1].split(":")
-                ymd_now = tr.doy2ymd(int(time_value[0])+2000,int(time_value[1]))
+                if int(time_value[0]) > 2000:
+                    ymd_now = tr.doy2ymd(int(time_value[0]),int(time_value[1]))
+                else:
+                    ymd_now = tr.doy2ymd(int(time_value[0])+2000,int(time_value[1]))
                 [w,soweek] = tr.ymd2gpst(ymd_now[0],ymd_now[1],ymd_now[2],float(time_value[2])/3600,0,0)
                 if soweek < soweek_last:
                     soweek = soweek + num_slip_week * 604800
@@ -152,8 +154,11 @@ def loaddata_ref(File_name,all_data = {}, Inter_zpd = False):
                 if soweek not in all_data.keys():
                     all_data[soweek]={}
                 all_data[soweek]["ZWD"] = (float(value[2]))
-                all_data[soweek]["TGN"] = (float(value[4]))
-                all_data[soweek]["TGE"] = (float(value[6]))
+                all_data[soweek]["TGN"] = 0
+                all_data[soweek]["TGE"] = 0
+                if len(value) > 4:
+                    all_data[soweek]["TGN"] = (float(value[4]))
+                    all_data[soweek]["TGE"] = (float(value[6]))
                 all_data[soweek]["AMB"] = 1
                 #=== Interp ===#
                 if Inter_zpd:
@@ -185,9 +190,14 @@ def compare_zwd(Data_raw,Data_ref):
         if cur_time not in all_data.keys() and cur_time in Data_ref.keys():
             all_data[cur_time] = {}
             all_data[cur_time]["ZWD"] = Data_raw[cur_time]["ZWD"] - Data_ref[cur_time]["ZWD"]
-            all_data[cur_time]["TGN"] = Data_raw[cur_time]["TGN"] - Data_ref[cur_time]["TGN"]
-            all_data[cur_time]["TGE"] = Data_raw[cur_time]["TGE"] - Data_ref[cur_time]["TGE"]
-            all_data[cur_time]["AMB"] = Data_raw[cur_time]["AMB"]
+            if "TGN" in Data_raw[cur_time].keys():
+                all_data[cur_time]["TGN"] = Data_raw[cur_time]["TGN"] - Data_ref[cur_time]["TGN"]
+                all_data[cur_time]["TGE"] = Data_raw[cur_time]["TGE"] - Data_ref[cur_time]["TGE"]
+                all_data[cur_time]["AMB"] = Data_raw[cur_time]["AMB"]
+            else:
+                all_data[cur_time]["TGN"] = 0
+                all_data[cur_time]["TGE"] = 0
+                all_data[cur_time]["AMB"] = 0
     return all_data
 
 def plot_ZWD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Legend = True):
@@ -332,7 +342,7 @@ def plot_MultiDay_ZWD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, L
         mode_list.append(cur_mode)
     #===Set Label===#
     axP.set_xticks(XlabelSet[1])
-    # axP.set_xticklabels(XlabelSet[0])
+    axP.set_xticklabels(XlabelSet[0])
     labels = axP.get_yticklabels() + axP.get_xticklabels()
     if Ylim != 0:
         axP.set_ylim(-Ylim,Ylim)
@@ -347,7 +357,7 @@ def plot_MultiDay_ZWD_delta(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, L
         doy = tr.ymd2doy(Start[0],Start[1],Start[2],Start[3] + cur_hour,Start[4],Start[5])
         [year,mon,day] = tr.doy2ymd(Start[0],doy)
         XlabelDate.append("{}-{:0>2}-{:0>2}".format(year,mon,day))
-    axP.set_xticklabels(XlabelDate)
+    # axP.set_xticklabels(XlabelDate)
     #===Set text===#
     MRS_str = "RMS:"
     RMS_value = []
@@ -1088,7 +1098,7 @@ def plot_qq_ZWD_delta(all_data = {},Ylim = 0.0, Show=True, Reconvergence = 3600,
         #     file_name = file_name + "-{}".format(cur_mode)
         # plt.savefig(os.path.join(Save_dir,"ZWD-BOX-ZOOM{}.jpg".format(file_name)),dpi=600)
 
-def Plot_MultiDay_timeseries_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5,Save_dir="",Fixed = False,Show=True,All=False,Time_type = "GPST",Delta_xlabel = 1,Delay_model = 0,Legend = False,Sigma=3,Signum=0,Start_hour = 0,End_hour = 0,Inter_zpd = False, Reconvergence = 3600, Recon_list = [50,100], Percent = 0.9):
+def Plot_MultiDay_timeseries_zwd(File_info=[],Start=[],End=[],Plot_type=[],Ylim=0.5,Save_dir="",Fixed = False,Show=True,All=False,Time_type = "GPST",Delta_xlabel = 1,Delay_model = 0,Legend = False,Sigma=3,Signum=0,Start_hour = 0,End_hour = 24,Inter_zpd = False, Reconvergence = 3600, Recon_list = [50,100], Percent = 0.9):
     all_data,data_raw,data_ref = {},{},{}
     [start_week,start_sow] = tr.ymd2gpst(Start[0],Start[1],Start[2],Start[3],Start[4],Start[5])
     [end_week,end_sow] = tr.ymd2gpst(End[0],End[1],End[2],End[3],End[4],End[5])

@@ -10,9 +10,7 @@ import sys
 import numpy as np
 import math
 from numpy.core.fromnumeric import shape
-from numpy.core.numeric import NaN
 
-from numpy.lib.function_base import append
 import trans as tr
 import glv
 
@@ -289,10 +287,10 @@ def max_stec(IPP_data1 = {},IPP_data2 = {}):
             if (sat[0]=='C' and predata[time][sat]['TEC'] != 0):
                 data_C.append(np.abs(predata[time][sat]['TEC']))
     
-    std["G"] = NaN
-    std["R"] = NaN
-    std["E"] = NaN
-    std["C"] = NaN
+    std["G"] = np.nan
+    std["R"] = np.nan
+    std["E"] = np.nan
+    std["C"] = np.nan
     if (len(data_G) != 0):
         std["G"] = np.max(data_G)
     if (len(data_R) != 0):

@@ -19,7 +19,6 @@ from numpy.core.fromnumeric import shape, size
 import dataprocess as dp
 import matplotlib.colors as colors
 # from matplotlib.pyplot import MultipleLocator
-import seaborn as sns
 import math
 import trans as tr
 import glv
@@ -90,6 +89,8 @@ TRUE_Position = {
             'USN7':[1112161.9906,-4842854.6586,3985497.0792],'MRL2':[-4749991.7348,520984.3719,-4210603.3157],'HRAO':[5085352.5088,2668396.2456,-2768731.2600],
             'CKSV':[-2956619.4468,5075902.2016,2476625.4732],'HLFX':[2018905.4820,-4069070.5733,4462415.5886],'WES2':[1492232.9362,-4458089.5051,4296046.1068],
             'PRE4':[5066223.4599,2719223.3313,-2754406.2063],'GODN':[1130760.6851,-4831298.6766,3994155.2048],'CHPI':[4164613.9575,-4162457.0562,-2445028.6136],
+            "DARW":[-4091359.77924,4684606.33864,-1408578.83072],'GANP':[3929181.7599,1455237.2667,4793654.7079],'GOP6':[3979319.6273,1050311.9142,4857064.3557],
+            "TUBO":[4001470.5966,1192345.3073,4805795.3211],'DAV1':[486854.59384,2285099.14184,-5914955.72274]
 }
 
 #=== FONT SET ===#
@@ -105,17 +106,100 @@ color_list = ["#0099E5","#34BF49","#FF4C4C"]
 #               "#b7295a","#6e2585","#f2af00","#5482ab","#ce1126",
 #               "#444444","#eeeeee"]
 
-def loaddata(File_name = "", Start = [], End = []):
+def loaddata(File_name = "", Start = [], End = [], Site = ""):
     #Judge the Head
     file = open(File_name,"r")
-    first_line = next(file)
+    while True:
+        first_line = next(file)
+        if len(first_line) > 1:
+            break
     file.close()
     first_value = first_line.split()
     if first_value[0] == r"%EPO":
         AllData = loaddata_lsq(File_name,Start,End)
+    elif first_value[0] == "PPP":
+         AllData = loaddata_bncppp(File_name,Start,End)
+    elif "NEU" in first_line or "t_pppClient" in first_line:
+         AllData = loaddata_bnclog(File_name,Start,End)
     else:
         AllData = loaddata_flt(File_name,Start,End)
     return AllData
+
+def loaddata_bncppp(File_name = "", Start = [], End = []):
+    all_data={}
+    w_last = 0
+    head_end = False
+    with open(File_name,'rt') as f:
+        for line in f:
+            value = line.split()
+            if "X =" in line:
+                ymd = value[0].split("_")[0]
+                hms = value[0].split("_")[1]
+                year = float(ymd[0:4])
+                month = float(ymd[5:7])
+                day = float(ymd[8:10])
+                hour = float(hms[0:2])
+                minute = float(hms[3:5])
+                second = float(hms[6:12])
+                [w,soweek] = tr.ymd2gpst(year,month,day,hour,minute,second)
+                if (w_last==0):
+                    w_last = w
+                soweek = soweek + (w-w_last)*604800
+                #soweek = hour + minute/60.0 + second/3600.0
+                if soweek not in all_data.keys():
+                    all_data[soweek]={}
+                all_data[soweek]['X'] = float(value[4])
+                all_data[soweek]['Y'] = float(value[9])
+                all_data[soweek]['Z'] = float(value[14])
+                all_data[soweek]['CLK'] = 0
+                all_data[soweek]['NSAT'] = 0
+                all_data[soweek]['GDOP'] = 0
+                all_data[soweek]['PDOP'] = 0
+                all_data[soweek]['AMB'] = 0
+                # if value[17] == 'Fixed':
+                #     all_data[soweek]['AMB'] = 1
+                # else:
+                #     all_data[soweek]['AMB'] = 0
+                
+    return all_data
+
+def loaddata_bnclog(File_name = "", Start = [], End = []):
+    all_data={}
+    w_last = 0
+    head_end = False
+    with open(File_name,'rt') as f:
+        for line in f:
+            value = line.split()
+            if "X =" in line:
+                ymd = value[2].split("_")[0]
+                hms = value[2].split("_")[1]
+                year = float(ymd[0:4])
+                month = float(ymd[5:7])
+                day = float(ymd[8:10])
+                hour = float(hms[0:2])
+                minute = float(hms[3:5])
+                second = float(hms[6:12])
+                [w,soweek] = tr.ymd2gpst(year,month,day,hour,minute,second)
+                if (w_last==0):
+                    w_last = w
+                soweek = soweek + (w-w_last)*604800
+                #soweek = hour + minute/60.0 + second/3600.0
+                if soweek not in all_data.keys():
+                    all_data[soweek]={}
+                all_data[soweek]['X'] = float(value[6])
+                all_data[soweek]['Y'] = float(value[9])
+                all_data[soweek]['Z'] = float(value[12])
+                all_data[soweek]['CLK'] = 0
+                all_data[soweek]['NSAT'] = 0
+                all_data[soweek]['GDOP'] = 0
+                all_data[soweek]['PDOP'] = 0
+                all_data[soweek]['AMB'] = 0
+                # if value[17] == 'Fixed':
+                #     all_data[soweek]['AMB'] = 1
+                # else:
+                #     all_data[soweek]['AMB'] = 0
+                
+    return all_data
 
 def loaddata_flt(File_name = "", Start = [], End = []):
     all_data={}
@@ -140,8 +224,8 @@ def loaddata_flt(File_name = "", Start = [], End = []):
                 all_data[soweek]['Z'] = float(value[3])
                 all_data[soweek]['NSAT'] = float(value[13])
                 all_data[soweek]['PDOP'] = float(value[14])
-                all_data[soweek]['Q'] = float(value[18])
-                if value[16] == 'Fixed' and all_data[soweek]['Q']  == 1:
+                all_data[soweek]['Q'] = float(value[17])
+                if value[16] == 'Fixed':
                     all_data[soweek]['AMB'] = 1
                 else:
                     all_data[soweek]['AMB'] = 0
@@ -595,7 +679,7 @@ def Plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [
     #=== Load data & XYZ2ENU ===#
     Data_All = {}
     for i in range(file_num):   
-        data_raw_temp = loaddata(File_info[i][0],[start_week,start_sow],[end_week,end_sow])
+        data_raw_temp = loaddata(File_info[i][0],[start_week,start_sow],[end_week,end_sow],File_info[i][1])
         if len(data_raw_temp) == 0:
             return
         # Static
@@ -610,7 +694,7 @@ def Plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [
     
     #=== Data Convert ===#
     num_mode = len(File_info)
-    [XLabel,XTick,cov_time,begT,LastT]=glv.xtick(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
+    [XLabel,XTick,cov_time,begT,LastT]=glv.xtick_min(Time_type,Start[0],Start[1],Start[2],Start[3]+Start[4]/60,duration_time,Delta_xlabel)
     # Initialization
     PLOT_ALL,PLOT_RAW = {},{}
     type_list = ["E","N","U","NSAT","PDOP","AMB","TIME"]
@@ -642,7 +726,7 @@ def Plot_timeseries_position(File_info = [], Start = [], End = [], Plot_type = [
         edit_mean(PLOT_ALL, PLOT_RAW)
 
     #=== Statistics ===#
-    # statistics(PLOT_RAW,PLOT_ALL,Delta_data,Start,duration_time,Reconvergence,Recon_list,Show,Save_dir)
+    statistics(PLOT_RAW,PLOT_ALL,Delta_data,Start,duration_time,Reconvergence,Recon_list,Show,Save_dir)
 
     #=== Plot ===#
     if Plot_type == ["E","N","U"]:

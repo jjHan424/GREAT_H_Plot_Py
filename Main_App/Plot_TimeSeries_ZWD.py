@@ -7,31 +7,25 @@ import readfile as rf
 import matplotlib as mpl
 mpl.use("TkAgg")
 import matplotlib.pyplot as plt
-import dataprocess as dp
-import draw as dr
 #import seaborn as sns
-import trans as tr
 import Lib_Plot_ZWD as PlotZWD
 
 #Setup Plot
 file_info_list = [
-    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPP/2023080/client/BRUX-GEC3-FIXED-30-3600.flt","/Users/hanjunjie/Gap1/Data/2023/ZTD/080/BRUX0800.23zpd","Server"],
-    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2023080/client/BRUX-GEC3-FIXED-30-3600-LSQ.flt","/Users/hanjunjie/Gap1/Data/2023/ZTD/080/BRUX0800.23zpd","Raw"],
-    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2023080/client/BRUX-GEC3-FIXED-30-3600-LSQ-MeanBug.flt","/Users/hanjunjie/Gap1/Data/2023/ZTD/080/BRUX0800.23zpd","Test1"],
-    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2023080/client/BRUX-GEC3-FIXED-30-3600-LSQ-MeanBug-5MIN.flt","/Users/hanjunjie/Gap1/Data/2023/ZTD/080/BRUX0800.23zpd","Test2"],
-    ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2023080/client/BRUX-GEC3-FIXED-30-3600-LSQ-MAX.flt","/Users/hanjunjie/Gap1/Data/2023/ZTD/080/BRUX0800.23zpd","Test3"],
-    # ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPPRTK/2023080/client/BRUX-GEC3-FIXED-30-3600.flt","/Users/hanjunjie/Gap1/Data/2023/ZTD/080/BRUX0800.23zpd","Test"],
+    # [r"E:\PhD_1\4.RTZTD\BNC\BCN_RINEX\2024160\0crd\UPC1WHURTS_20241610000_01D_30S_DARW00AUS_TRO_SAVE.TRO",r"E:\PhD_1\4.RTZTD\Data\ZTD\161\IGS0OPSFIN_20241610000_01D_05M_DARW00AUS_TRO.TRO","OLD"],
+     [r"E:\PhD_1\4.RTZTD\BNC\UPC1WHURTS_20250970000_01D_05S_DARW00AUS_TRO.TRO",r"E:\PhD_1\4.RTZTD\BNC\UPC1WHURTS_20250970000_01D_05M_DARW00AUS_TRO.TRO","GREAT"],
+    #  [r"E:\PhD_1\4.RTZTD\BNC\BCN_RINEX\2024160\0crd\UPC1CNERTS_20241610000_01D_30S_DARW00AUS_TRO.TRO",r"E:\PhD_1\4.RTZTD\Data\ZTD\161\IGS0OPSFIN_20241610000_01D_05M_DARW00AUS_TRO.TRO","BNC"],
     ] #[Raw, Ref, Mode] #[file,mode]
 # file_info_list = [
-#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Server/ZWD/PPPRTK/2023080/client/BRUX-GEC3-FIXED-30-3600.flt","Server"],
-#     ["/Users/hanjunjie/Gap1/ZWD_Retrieval_PPPRTK/Project/2023080/client/BRUX-GEC3-FIXED-30-3600-RAW.flt","Mac"],
-#     ["/Users/hanjunjie/Gap1/Data/2023/ZTD/080/BRUX0800.23zpd","REF"]
+#     [r"E:\PhD_1\4.RTZTD\BNC\UPC1CNERTS_20250960000_01D_05S_DARW00AUS_TRO.TRO","1S"],
+#     [r"E:\PhD_1\4.RTZTD\BNC\UPC1CNERTS_20250960000_01D_05M_DARW00AUS_TRO.TRO","5M"],
+#     # [r"E:\PhD_1\4.RTZTD\Data\ZTD\161\IGS0OPSFIN_20241610000_01D_05M_DARW00AUS_TRO.TRO","REF"]
 #     ] #[Raw, Ref, Mode] #[file,mode]
 
-start_time = [2023,3,21,2,0,0]
-end_time = [2023,3,21,24,0,0]
+start_time = [2025,4,7,0,0,0]
+end_time = [2025,4,7,10,0,0]
 plot_type = "ZWD_DELTA" # ZWD_DELTA ZWD_RAW GRD_RAW GRD_DELTA
-ylim = 200 # mm for Delta
+ylim = 0 # mm for Delta
 save_dir = ""
 fixed = False
 show = True
@@ -42,7 +36,7 @@ sigma = 3
 sigma_num = 0
 delay_model = 0
 legend = False
-inter_zpd = True
+inter_zpd = False
 reconvergence = 3600
 recon_list = [50]
 

@@ -22,7 +22,6 @@ from numpy.core.fromnumeric import shape, size
 import dataprocess as dp
 import matplotlib.colors as colors
 # from matplotlib.pyplot import MultipleLocator
-import seaborn as sns
 import math
 import trans as tr
 import glv

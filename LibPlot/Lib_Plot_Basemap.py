@@ -3,10 +3,9 @@ import os
 import sys
 from turtle import width
 from numpy import size
-sys.path.insert(0,os.path.dirname(__file__)+'/..')
-sys.path.insert(0,os.path.dirname(__file__)+'/../..')
-import folium
-from folium.features import DivIcon
+sys.path.insert(0,os.path.join(os.path.dirname(__file__),'..'))
+sys.path.insert(0,os.path.join(os.path.dirname(__file__),'..','..'))
+sys.path.insert(0,os.path.join(os.path.dirname(__file__),'..','LibBase'))
 import matplotlib.pyplot as plt
 import webbrowser
 import trans as tr
@@ -17,8 +16,6 @@ import glv
 import math
 import matplotlib as mpl
 import numpy as np
-from folium.plugins import HeatMap
-import seaborn as sns
 from mpl_toolkits.basemap import Basemap
 from adjustText import adjust_text
 from matplotlib.colors import Normalize

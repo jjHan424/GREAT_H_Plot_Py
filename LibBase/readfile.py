@@ -7,7 +7,6 @@ Description: read data file
 import numpy as np
 import math
 import glv
-from pyrsistent import s
 import trans as tr
 import os
 
