@@ -157,6 +157,11 @@ def doy2ymd(year,doy):
     year = time_now.year
     return [year,month,day]
 
+def doy2gpst(year,doy,hour,minute,second):
+    [year,month,day] = doy2ymd(year,doy)
+    [w,sow] = ymd2gpst(year,month,day,hour,minute,second)
+    return (w,sow)
+
 def transformlat(lng, lat):
     PI = 3.1415926535897932384626
     ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * \

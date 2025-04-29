@@ -12,7 +12,7 @@ import Lib_Plot_Position as PlotPOS
 
 #Setup Plot
 # site_list = ['ACSO', 'ALBH', 'ALGO', 'AMC4', 'BAIE', 'BAMF', 'BARH', 'BILL', 'BLYT', 'BREW', 'CAGS', 'CHUR', 'CHWK', 'CIT1', 'CMP9', 'COSO', 'CRFP', 'DHLG', 'DRAO', 'DUBO', 'EPRT', 'ESCU', 'FLIN', 'FRDN', 'GODE', 'GODN', 'GODS', 'GODZ', 'GOL2', 'GOLD', 'HLFX', 'HNPT', 'HOLB', 'HOLP', 'JPLM', 'KSU1', 'KUJ2', 'MDO1', 'MONP', 'MRC1', 'NAIN', 'NANO', 'NIST', 'NLIB', 'NRC1', 'P043', 'P051', 'P053', 'P389', 'P779', 'P802', 'PICL', 'PIE1', 'PIN1', 'PRDS', 'QUIN', 'ROCK', 'SASK', 'SCH2', 'SCIP', 'SFDM', 'SGPO', 'SHE2', 'SNI1', 'STFU', 'STJ3', 'STJO', 'STPM', 'TABL', 'TORP', 'TRAK', 'UCAL', 'UCLP', 'UCLU', 'UNB3', 'UNBD', 'UNBJ', 'UNBN', 'USN7', 'USN8', 'USN9', 'VALD', 'VNDP', 'WDC5', 'WDC6', 'WES2', 'WHC1', 'WIDC', 'WILL', 'WLSN']
-site_list = ["DAV1"]
+site_list = ["DARW"]
 file_dir = "/Users/hanjunjie/Gap1/汇报/Image/MagneticStorm2/FLT114"
 # path_list = os.listdir(file_dir)
 site_list_new = []
@@ -28,8 +28,8 @@ for cur_site in site_list:
     file_info_list = [
         ["/Users/hanjunjie/Gap1/Magnetic_storm/Server/FLT_KIN/132/{}-GEC3-FLOAT-30.flt".format(cur_site), cur_site, cur_site]
         ] #[filedir, station_name, mode_name] for static station // #[filedir, ref_file, mode_name] for dynamic station
-    start_time = [2024,6,13,3,0,0]
-    end_time = [2024,6,13,24,0,0]
+    start_time = [2025,4,22,0,0,0]
+    end_time = [2025,4,22,24,0,0]
     file_info_list = [
         # [r"E:\PhD_1\4.RTZTD\BNC\BCN_RINEX\2024160\0crd_250331_01DRNX",cur_site,"BNC"],
         # [r"E:\PhD_1\4.RTZTD\BNC\BCN_RINEX\2024160\0crd_250402_01DRNX_05S_WHUSSR_2024160",cur_site,"OLD"],
@@ -41,14 +41,16 @@ for cur_site in site_list:
                     #   [r"E:\1Gap_1\HJX\hjx\client_ZWD\TUBO-GEC.flt",cur_site,"GEC"],
                     #   [r"E:\PhD_1\4.RTZTD\BNC\BCN_RINEX\2024160\0crd\DAV100ATA_20241650000_01D_05M_NEWEPH.ppp",cur_site,"OLD"],
                     #   [r"E:\PhD_1\4.RTZTD\BNC\BCN_RINEX\2024160\0crd\DAV100ATA_20241650000_01D_05M_CNE.ppp",cur_site,"OLD"],
-                      [r"E:\PhD_1\4.RTZTD\BNC\DARW00AUS_20251000000_01D_05M.ppp",cur_site,"NEW"]
+                    #   [r"E:\PhD_1\4.RTZTD\BNC\BCN_RINEX\2024160\0crd_250424_CNE",cur_site,"CNE"],
+                    #   [r"E:\PhD_1\4.RTZTD\BNC\BCN_RINEX\2024160\0crd_250424_WHU",cur_site,"WHU"],
+                      [r"E:\PhD_1\4.RTZTD\BNC\BCN_RINEX\2024160\0crd_250427",cur_site,"GFZ"]
                     ]
     plot_type = ["E","N","U"]
     ylim = 0
     save_dir = "/Users/hanjunjie/Gap1/汇报/Image/MagneticStorm2/FLT132"
     show = True
     fixed = False
-    all = True
+    all = False
     mean = True
     time_type = "GPST"
     delta_xlabel = 3

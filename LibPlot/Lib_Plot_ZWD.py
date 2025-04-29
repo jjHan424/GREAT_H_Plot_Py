@@ -448,7 +448,8 @@ def plot_MultiDay_ZWD_raw(Plot_Data={}, Ylim=0.5, XlabelSet = [], Show=True, Leg
         while day_num > 0:
             index_plot = (time_np >= Start_hour + 24*(day_num - 1)) & (time_np <= End_hour + 24*(day_num - 1))
             day_num = day_num - 1
-            axP.plot(time_np[index_plot],np.array(Plot_Data[cur_mode]["ZWD"])[index_plot],linewidth=2,color = color_list[index%3])
+            # axP.plot(time_np[index_plot],np.array(Plot_Data[cur_mode]["ZWD"])[index_plot],linewidth=2,color = color_list[index%3])
+            axP.scatter(time_np[index_plot],np.array(Plot_Data[cur_mode]["ZWD"])[index_plot],color = color_list[index%3])
         index = index + 1
         mode_list.append(cur_mode)
     #===Set Label===#
