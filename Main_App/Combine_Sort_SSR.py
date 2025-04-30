@@ -73,9 +73,10 @@ def write_file(file = "",data_list = [],year = 0,mon = 0,day = 0,hour = 0,mins =
 #=== SETINGS ===#
 inputFiledir = r"E:\PhD_1\4.RTZTD\Data\SSR"
 outputFiledir = r"E:\PhD_1\4.RTZTD\Data\SSR"
-AC = "CNE0"
+AC = "GFZ0"
 start_time,end_time = [2025,100],[2025,103]
 inter_val = 5
+outputInt = 300
 #===Start Process ===#
 cur_time = start_time
 outputFile =  os.path.join(outputFiledir,"SSRA00{}_S_{:4}{:0>3}0000_{:0>2}D_MC.ssr".format(AC,start_time[0],start_time[1], end_time[1] - start_time[1] + 1))
@@ -88,8 +89,8 @@ while cur_time[1] <= end_time[1]:
     temp = cur_orb.toString()
     cur_hms = [0,0,0]
     save_data,save_time = {},{}
-    save_data["ORBIT"],save_data["CLOCK"],save_data["CODE_BIAS"],save_data["PHASE_BIAS"] = [],[],[],[]
-    save_time["ORBIT"],save_time["CLOCK"],save_time["CODE_BIAS"],save_time["PHASE_BIAS"] = [],[],[],[]
+    save_data["ORBIT"],save_data["CLOCK"],save_data["CODE_BIAS"],save_data["PHASE_BIAS"] = {},{},{},{}
+    save_time["ORBIT"],save_time["CLOCK"],save_time["CODE_BIAS"],save_time["PHASE_BIAS"] = {},{},{},{}
     if os.path.exists(cur_file):
         with open(cur_file,'rt') as f_in:
             cur_type = "NONE"
@@ -100,29 +101,14 @@ while cur_time[1] <= end_time[1]:
                 value = line.split()
                 if value[0] == ">":
                     if cur_type != "NONE" and cur_type != "VTEC":
-                        if (last_week - data_week) + (last_sow - data_sow) != 0 and (last_week - flag_start_week) + (last_sow - flag_start_sow) != 0 and rt_write:
-                            cur_hms[2] = cur_hms[2] + inter_val
-                            if cur_hms[2] == 60:
-                                cur_hms[2] = 0
-                                cur_hms[1] = cur_hms[1] + 1
-                            if cur_hms[1] == 60:
-                                cur_hms[1] = 0
-                                cur_hms[0] = cur_hms[0] + 1
-                        cur_week,cur_sow = tr.doy2gpst(cur_time[0],cur_time[1],cur_hms[0],cur_hms[1],cur_hms[2])
-                        delta_time = (data_week - cur_week) * 3600 + (data_sow - cur_sow)
-                        if delta_time == 0:
-                            write_file(outputFile,data_list,y,mon,d,h,m,s)
-                            rt_write = True
-                        if delta_time > 0:
-                            save_data[cur_type].append(data_list)
-                            save_time[cur_type].append([y,mon,d,h,m,s])
+                        # if y == cur_time[0] and data_doy == cur_time[1]:
+                        save_data[cur_type][week_dot_sow] = (data_list)
+                        save_time[cur_type][week_dot_sow] = ([y,mon,d,h,m,s])
                     cur_type = value[1]
                     y,mon,d,h,m,s = int(value[2]),int(value[3]),int(value[4]),int(value[5]),int(value[6]),float(value[7])
-                    if last_week != 0:
-                        last_week,last_sow = data_week,data_sow
                     data_week,data_sow = tr.ymd2gpst(y,mon,d,h,m,s)
-                    if last_week == 0:
-                        last_week,last_sow = data_week,data_sow
+                    data_doy = tr.ymd2doy(y,mon,d)
+                    week_dot_sow = data_week + data_sow/604800
                     update_indicator = int(value[8])
                     num_sat = int(value[9])
                     source = value[10]
@@ -149,14 +135,19 @@ while cur_time[1] <= end_time[1]:
                     cur_data = PHASE_BIAS()
                     cur_data.PRN,cur_data.string_raw = value[0],line[:-1]
                     data_list.append(cur_data)
-    for i in range(len(save_time["ORBIT"])):
+    for cur_key in save_time.keys():
+        temp = dict(sorted(save_time[cur_key].items(),key = lambda item: item[0]))
+        save_time[cur_key] = temp
+    
+    for i in save_time["ORBIT"].keys():
         y,mon,d,h,m,s = save_time["ORBIT"][i][0],save_time["ORBIT"][i][1],save_time["ORBIT"][i][2],\
         save_time["ORBIT"][i][3],save_time["ORBIT"][i][4],save_time["ORBIT"][i][5]
-        write_file(outputFile,save_data["ORBIT"][i],y,mon,d,h,m,s)
-        if save_time["ORBIT"][i] in save_time["CLOCK"]:
-            write_file(outputFile,save_data["CLOCK"][i],y,mon,d,h,m,s)
-        if save_time["ORBIT"][i] in save_time["CODE_BIAS"]:
-            write_file(outputFile,save_data["CODE_BIAS"][i],y,mon,d,h,m,s)
-        if save_time["ORBIT"][i] in save_time["PHASE_BIAS"]:
-            write_file(outputFile,save_data["PHASE_BIAS"][i],y,mon,d,h,m,s)
+        if (s+m*60) % outputInt == 0:
+            write_file(outputFile,save_data["ORBIT"][i],y,mon,d,h,m,s)
+            if i in save_time["CLOCK"]:
+                write_file(outputFile,save_data["CLOCK"][i],y,mon,d,h,m,s)
+            if i in save_time["CODE_BIAS"]:
+                write_file(outputFile,save_data["CODE_BIAS"][i],y,mon,d,h,m,s)
+            if i in save_time["PHASE_BIAS"]:
+                write_file(outputFile,save_data["PHASE_BIAS"][i],y,mon,d,h,m,s)
     cur_time[1] = cur_time[1]+1
